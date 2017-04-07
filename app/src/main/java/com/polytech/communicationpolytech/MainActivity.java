@@ -21,8 +21,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
+
+        //setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
+
         setTitle(R.string.home);
+
 
         ImageView banner=(ImageView) findViewById(R.id.main_imgbanner);
         Glide.with(this).load(R.drawable.banner_polytech).into(banner);
@@ -31,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         List<HomeItem> HomeObjects=HomeItem.getHomeObjectList(this);
 
         recyclerView.setAdapter(new HomeRecyclerAdapter(this,HomeObjects));
+        recyclerView.setHasFixedSize(true);
 
         GridLayoutManager layoutManager=new GridLayoutManager(this,2);
         layoutManager.setOrientation(GridLayoutManager.VERTICAL);

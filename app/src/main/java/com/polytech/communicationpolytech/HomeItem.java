@@ -94,7 +94,7 @@ public class HomeItem {
 
         HomeItem reseau=new HomeItem();
         reseau.setCardID(1);
-        reseau.setThumbID(R.drawable.polytech);
+        reseau.setThumbID(R.drawable.ic_smallpolytech);
         reseau.setTitle(mainActivity.getString(R.string.reseau_polytech));
         reseau.setIconID(R.drawable.ic_smallpolytech);
         reseau.setOnClickListener(new View.OnClickListener() {
@@ -121,7 +121,7 @@ public class HomeItem {
         dataList.add(candidat);
 
         HomeItem quizz=new HomeItem();
-        quizz.setCardID(2);
+        quizz.setCardID(3);
         quizz.setThumbID(R.drawable.polytech);
         quizz.setTitle(mainActivity.getString(R.string.quizz));
         quizz.setIconID(R.drawable.ic_help_outline_black_24dp);
@@ -133,7 +133,6 @@ public class HomeItem {
             }
         });
         dataList.add(quizz);
-
 
         return dataList;
     }

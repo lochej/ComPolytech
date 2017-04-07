@@ -77,7 +77,7 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapte
             itemView.setOnClickListener(clickListener);
             this.title.setText(title);
             Glide.with(itemView.getContext()).load(thumbid).into(imgThumb);
-            Glide.with(itemView.getContext()).load(iconid).into(imgIcon);
+            imgIcon.setImageResource(iconid);
 
         }
     }

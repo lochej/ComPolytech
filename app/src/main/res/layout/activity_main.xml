@@ -4,8 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    >
 
+    <!--
     <android.support.design.widget.AppBarLayout
         android:id="@+id/main.appbar"
         android:layout_width="match_parent"
@@ -32,11 +33,29 @@
 
                 <ImageView
                     android:id="@+id/main.imgbanner"
-                    android:scaleType="center"
+                    android:scaleType="fitCenter"
                     android:fitsSystemWindows="true"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     />
+
+
+                <ImageView
+                    android:id="@+id/main.imgbanner.pastille"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_pastille"
+                    android:fitsSystemWindows="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:paddingBottom="25dp"
+                    android:paddingRight="5dp"
+                    android:paddingEnd="5dp"
+                    android:layout_width="150dp"
+                    android:layout_height="75dp"
+                    />
+
+
             </RelativeLayout>
 
             <android.support.v7.widget.Toolbar
@@ -50,6 +69,8 @@
 
 
     </android.support.design.widget.AppBarLayout>
+
+    -->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/main.fab"
@@ -66,13 +87,42 @@
         app:fabSize="normal"
         />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/main.recyclerview"
+
+
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:scrollbars="vertical"/>
+        >
+        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
+
+        <RelativeLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+
+            <ImageView
+                android:id="@+id/main.imgbanner"
+                android:scaleType="centerInside"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_below="@id/main.imgbanner"
+                android:id="@+id/main.recyclerview"
+                android:nestedScrollingEnabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                />
+
+        </RelativeLayout>
+
+
+    </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>
