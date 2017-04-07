@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Communication Polytech</string>
     <string name="card_view_title">Titre</string>
+    <string name="polytech_tours">Polytech\'Tours</string>
+    <string name="reseau_polytech">Réseau Polytech</string>
+    <string name="espace_candidat">Espace Candidat</string>
+    <string name="quizz">Quizz</string>
+    <string name="home">Accueil</string>
+
 </resources>
