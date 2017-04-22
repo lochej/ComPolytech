@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="@dimen/windowsMargins"
+    android:orientation="vertical"
+    android:id="@+id/contact_main_coordinator">
+
+
+
+
+    <LinearLayout
+        android:id="@+id/contact_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/windowsMargins"
+        android:layout_marginLeft="@dimen/windowsMargins"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/contact_hint"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textSize="24sp"
+            android:text="@string/contact_hint_intro"/>
+
+        <View
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:id="@+id/contact_divider"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:elevation="3dp"
+            android:background="@color/headerDivider"/>
+
+        <TextView
+            android:id="@+id/contact_titleName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/Name"
+            style="@android:style/TextAppearance.DeviceDefault.Large"
+            />
+
+        <EditText
+            android:id="@+id/contact_nameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/Name"
+            android:inputType="textPersonName"
+            />
+
+        <TextView
+
+            android:id="@+id/contact_titleFirstName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/First_name"
+            style="@android:style/TextAppearance.DeviceDefault.Large"
+            />
+
+        <EditText
+            android:id="@+id/contact_firstNameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/First_name"
+            android:inputType="textPersonName"
+            />
+
+        <TextView
+            android:id="@+id/contact_titleEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/e_mail"
+            style="@android:style/TextAppearance.DeviceDefault.Large"
+            />
+
+        <EditText
+            android:id="@+id/contact_mailEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/mail_example"
+            android:inputType="textEmailAddress"
+            />
+
+
+    </LinearLayout>
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_margin="@dimen/windowsMargins"
+        android:clickable="true"
+        android:src="@drawable/ic_check_black_24dp"
+        android:tint="@android:color/white"
+        app:layout_anchor="@id/contact_content"
+        app:layout_anchorGravity="bottom|end|right"
+        app:backgroundTint="@color/greenLock"
+        app:rippleColor="@android:color/white"
+        app:elevation="12dp"
+        android:onClick="OnConfirmForm"
+        />
+
+
+</android.support.design.widget.CoordinatorLayout>

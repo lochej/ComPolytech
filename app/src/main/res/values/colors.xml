@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">@color/polytech</color>
+    <color name="colorPrimaryDark">@color/polytechDark</color>
     <color name="colorAccent">#FFB600</color>
+    <color name="materialLightBackground">#FAFAFA</color>
 
     <color name="cardBackground">@android:color/background_light</color>
+    <color name="cardTitleBackground">#FAFAFA</color>
+    <color name="redLock">#e02828</color>
+    <color name="greenLock">#35ad1d</color>
+    <color name="headerDivider">@color/colorAccent</color>
+    <color name="polytech">#009edf</color>
+    <color name="polytechDark">#0088bf</color>
 </resources>

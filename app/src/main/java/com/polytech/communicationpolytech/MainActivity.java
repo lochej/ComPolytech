@@ -1,12 +1,12 @@
 package com.polytech.communicationpolytech;
 
 
+import android.content.Intent;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         ImageView banner=(ImageView) findViewById(R.id.main_imgbanner);
-        Glide.with(this).load(R.drawable.banner_polytech).into(banner);
+        Glide.with(this).load(R.drawable.img_banner_polytech).into(banner);
 
         RecyclerView recyclerView=(RecyclerView) findViewById(R.id.main_recyclerview);
         List<HomeItem> HomeObjects=HomeItem.getHomeObjectList(this);
@@ -36,11 +36,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(new HomeRecyclerAdapter(this,HomeObjects));
         recyclerView.setHasFixedSize(true);
 
-        GridLayoutManager layoutManager=new GridLayoutManager(this,2);
-        layoutManager.setOrientation(GridLayoutManager.VERTICAL);
-        recyclerView.setLayoutManager(layoutManager);
-
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+
     }
 
     public void OnClickPolytech(View view){
@@ -59,6 +56,21 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this,"QUIZZ",Toast.LENGTH_SHORT).show();
     }
 
+    public void OnClickSecureAcess(View view){
+        //Intent startReservedSpace=new Intent(view.getContext(),ReservedSpaceActivity.class);
 
+        //view.getContext().startActivity(startReservedSpace);
+
+        DialogFragment frag=new DialogFragmentPassword();
+        frag.show(getSupportFragmentManager(),"Password");
+    }
+
+    public void OnClickContactMe(View view){
+
+        Intent startContactActivity=new Intent(view.getContext(),ContactActivity.class);
+
+        view.getContext().startActivity(startContactActivity);
+
+    }
 
 }

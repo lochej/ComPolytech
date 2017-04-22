@@ -108,8 +108,8 @@ public class HomeItem {
 
         HomeItem candidat=new HomeItem();
         candidat.setCardID(2);
-        candidat.setThumbID(R.drawable.candidat);
-        candidat.setIconID(R.drawable.ic_picture_as_pdf_black_24dp);
+        candidat.setThumbID(R.drawable.img_candidat);
+        candidat.setIconID(R.drawable.ic_scholarship);
         candidat.setTitle(mainActivity.getString(R.string.espace_candidat));
         candidat.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -124,7 +124,7 @@ public class HomeItem {
         quizz.setCardID(3);
         quizz.setThumbID(R.drawable.polytech);
         quizz.setTitle(mainActivity.getString(R.string.quizz));
-        quizz.setIconID(R.drawable.ic_help_outline_black_24dp);
+        quizz.setIconID(R.drawable.ic_question);
         quizz.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -1,10 +1,30 @@
 <resources>
     <string name="app_name">Communication Polytech</string>
     <string name="card_view_title">Titre</string>
-    <string name="polytech_tours">Polytech\'Tours</string>
+    <string name="polytech_tours">Polytech Tours</string>
     <string name="reseau_polytech">Réseau Polytech</string>
     <string name="espace_candidat">Espace Candidat</string>
     <string name="quizz">Quizz</string>
     <string name="home">Accueil</string>
+    <string name="reserved_space">Espace réservé</string>
+    <string name="locked">Verrouillé</string>
+    <string name="banner_polytech">Bannière polytech</string>
+    <string name="password">Mot de passe</string>
+    <string name="validate">Valider</string>
+    <string name="cancel">Annuler</string>
+    <string name="pref_pass_hash_key">com.polytech.communicationpolytech.PREF_PASS_HASH</string>
+    <string name="incorrect_password">Mot de passe incorrect</string>
+    <string name="google_drive_sync">Synchroniser depuis Google Drive</string>
+    <string name="contact_me">Contactez-moi</string>
+    <string name="Name">Nom</string>
+    <string name="name">nom</string>
+    <string name="first_name">prénom</string>
+    <string name="First_name">Prénom</string>
+    <string name="e_mail">E-mail</string>
+    <string name="mail_example">adresse.mail@service.com</string>
+    <string name="star">(*)</string>
+    <string name="contact_hint_intro">Remplissez ce formulaire de contact si vous souhaitez être recontacté. Ces informations seront utilisés à titre informatif uniquement. Les champs (*) sont obligatoires.</string>
+    <string name="incorrect_email_adress">Addresse E-mail incorrecte.</string>
+    <string name="loading">Chargement en cours...</string>
 
 </resources>

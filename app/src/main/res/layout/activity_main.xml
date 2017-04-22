@@ -74,55 +74,90 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/main.fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right|end"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
         app:layout_anchorGravity="bottom|right|end"
         android:clickable="true"
-        android:src="@drawable/ic_contact_mail_black_24dp"
+        android:src="@drawable/ic_email_white_24dp"
         app:fabSize="normal"
+        app:useCompatPadding="true"
+        android:onClick="OnClickContactMe"
         />
 
-
-
-    <android.support.v4.widget.NestedScrollView
+    <FrameLayout
+        android:id="@+id/main.content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-        <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+        android:layout_height="match_parent">
 
-
-        <RelativeLayout
-            android:orientation="vertical"
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/main.scrollContent"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            >
+            <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
 
 
-
-            <ImageView
-                android:id="@+id/main.imgbanner"
-                android:scaleType="centerInside"
+            <RelativeLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
+                android:layout_height="match_parent">
+
+                <View
+                    android:id="@+id/main.divider1"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:elevation="3dp"
+                    android:background="@color/headerDivider"
+                    />
+
+                <ImageView
+                    android:id="@+id/main.imgbanner"
+                    android:layout_below="@id/main.divider1"
+                    android:contentDescription="@string/banner_polytech"
+                    android:scaleType="centerInside"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+
+                <View
+                    android:layout_below="@id/main.imgbanner"
+                    android:id="@+id/main.divider2"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:elevation="3dp"
+                    android:background="@color/headerDivider"
+                    />
+
+                <android.support.v7.widget.RecyclerView
+                    android:layout_below="@id/main.divider2"
+                    android:id="@+id/main.recyclerview"
+                    android:nestedScrollingEnabled="false"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="vertical"
+                    app:layoutManager="android.support.v7.widget.GridLayoutManager"
+                    app:spanCount="2"
+                    />
+
+            </RelativeLayout>
 
 
-            <android.support.v7.widget.RecyclerView
-                android:layout_below="@id/main.imgbanner"
-                android:id="@+id/main.recyclerview"
-                android:nestedScrollingEnabled="false"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="vertical"
-                />
+        </android.support.v4.widget.NestedScrollView>
 
-        </RelativeLayout>
+        <ImageButton
+            android:id="@+id/main.secureContent"
+            android:contentDescription="@string/locked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:elevation="2dp"
+            android:onClick="OnClickSecureAcess"
+            android:tint="@color/colorAccent"
+            app:srcCompat="@android:drawable/ic_lock_lock" />
 
+    </FrameLayout>
 
-    </android.support.v4.widget.NestedScrollView>
 
 </android.support.design.widget.CoordinatorLayout>
