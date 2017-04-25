@@ -114,7 +114,7 @@ public class HomeItem {
         candidat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent startReseauActivity=new Intent(v.getContext(),ReseauActivity.class);
+                Intent startReseauActivity=new Intent(v.getContext(),CandidatActivity.class);
                 v.getContext().startActivity(startReseauActivity);
             }
         });

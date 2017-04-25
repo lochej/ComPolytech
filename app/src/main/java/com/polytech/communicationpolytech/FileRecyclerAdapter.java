@@ -53,9 +53,10 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
     public void onViewDetachedFromWindow(FileViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
         //If the view is detached from the screen, kill the asynctask no longer needed
+        /*
         if(holder.pdfThumbTask !=null && holder.pdfThumbTask.getStatus() == AsyncTask.Status.RUNNING){
             holder.pdfThumbTask.cancel(true);
-        }
+        }*/
     }
 
     @Override

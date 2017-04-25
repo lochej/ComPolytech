@@ -38,7 +38,8 @@
             android:name=".ReservedSpaceActivity" />
 
         <activity
-            android:name=".ContactActivity" />
+            android:name=".ContactActivity"
+            android:windowSoftInputMode="adjustResize"/>
 
         <activity
             android:name=".CandidatDialog" />
