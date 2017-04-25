@@ -63,13 +63,14 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
     public void onViewRecycled(FileViewHolder holder) {
         super.onViewRecycled(holder);
 
-
+        /*
 
         //Kill the old asyntask if it is running
         if(holder.pdfThumbTask !=null && holder.pdfThumbTask.getStatus() == AsyncTask.Status.RUNNING){
             holder.pdfThumbTask.cancel(true);
         }
 
+        */
 
         //Set a white background during loading of the new Task
         holder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(holder.imgThumb.getContext(),R.color.cardBackground)));
@@ -221,6 +222,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         protected void onPreExecute() {
             super.onPreExecute();
             placeHolder.setVisibility(View.VISIBLE);
+            viewHolder.setIsRecyclable(false);
         }
 
         @Override
@@ -256,6 +258,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
             //Sauvegarde du Bitmap dans le cache
             currentItem.setThumbnailImage(bitmap);
             intoView.setImageBitmap(bitmap);
+            viewHolder.setIsRecyclable(true);
         }
     }
 
