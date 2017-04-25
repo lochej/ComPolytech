@@ -107,14 +107,26 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
 
         public void setData(FileItem currentItem, int position) {
 
+            this.currentItem=currentItem;
             int iconid = currentItem.getIconID();
             String title = currentItem.getTitle();
             View.OnClickListener clickListener = currentItem.getOnClickListener();
+            Bitmap thumbBitmap=currentItem.getThumbnailImage();
+
             itemView.setOnClickListener(clickListener);
             this.title.setText(title);
 
-            pdfThumbTask=new LoadPDFThumbTask(itemView.getContext(),this,currentItem.getFile());
-            pdfThumbTask.execute();
+
+            //Si le bitmap est valide
+            if(thumbBitmap!=null){
+                imgThumb.setImageBitmap(thumbBitmap);
+            }
+            //Sinon on lance le chargement
+            else{
+                pdfThumbTask=new LoadPDFThumbTask(itemView.getContext(),this,currentItem.getFile());
+                pdfThumbTask.execute();
+            }
+
 
             imgIcon.setImageResource(iconid);
 
@@ -168,7 +180,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
     /**
      * Charge la miniature dans une ImageView de manière asynchrone pour gagner en performance
      */
-    public class LoadPDFThumbTask extends AsyncTask<Void,Void,BitmapDrawable>{
+    public class LoadPDFThumbTask extends AsyncTask<Void,Void,Bitmap>{
 
         Context context;
         ImageView intoView;
@@ -191,14 +203,18 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         }
 
         @Override
-        protected BitmapDrawable doInBackground(Void... params) {
+        protected Bitmap doInBackground(Void... params) {
 
-            Bitmap pdfthumb = null;
+            Bitmap pdfthumb = viewHolder.currentItem.getThumbnailImage();
+            //On a deja une image de généré, on a pas besoin de la recharger
+            if(pdfthumb!=null){
+                return pdfthumb;
+            }
+
             try {
                 pdfthumb = getPdfThumbnail(context,pdfiumCore,pdfFile,intoView);
                 //Log.d("LoadPDftask",pdfFile.getName());
-                BitmapDrawable drawable=new BitmapDrawable(context.getResources(),pdfthumb);
-                return drawable;
+                return pdfthumb;
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -213,10 +229,12 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         }
 
         @Override
-        protected void onPostExecute(BitmapDrawable bitmap) {
+        protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
             viewHolder.placeholder.setVisibility(View.GONE);
-            intoView.setImageDrawable(bitmap);
+            //Sauvegarde du Bitmap dans le cache
+            viewHolder.currentItem.setThumbnailImage(bitmap);
+            intoView.setImageBitmap(bitmap);
         }
     }
 
