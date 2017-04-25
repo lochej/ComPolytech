@@ -26,6 +26,7 @@ import java.util.List;
 
 public class PolytechActivity extends AppCompatActivity {
 
+    final String TAG=getClass().getSimpleName();
     RecyclerView recyclerView;
     ProgressDialog progressDialog;
     LoadFilesTask loadTask;
@@ -72,7 +73,7 @@ public class PolytechActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d("stopping","STOPPING");
+        Log.d(TAG,"STOPPING");
         if(loadTask!=null){
             if(loadTask.getStatus() == AsyncTask.Status.RUNNING){
                 loadTask.cancel(true);

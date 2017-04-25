@@ -63,10 +63,14 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
     public void onViewRecycled(FileViewHolder holder) {
         super.onViewRecycled(holder);
 
+
+
         //Kill the old asyntask if it is running
         if(holder.pdfThumbTask !=null && holder.pdfThumbTask.getStatus() == AsyncTask.Status.RUNNING){
             holder.pdfThumbTask.cancel(true);
         }
+
+
         //Set a white background during loading of the new Task
         holder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(holder.imgThumb.getContext(),R.color.cardBackground)));
     }
@@ -88,6 +92,9 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
     }
 
     public class FileViewHolder extends RecyclerView.ViewHolder{
+
+        final String TAG=getClass().getSimpleName();
+
         private TextView title;
         private TextView placeholder;
         private ImageView imgThumb,imgIcon;
@@ -116,19 +123,28 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
             itemView.setOnClickListener(clickListener);
             this.title.setText(title);
 
+            imgIcon.setImageResource(iconid);
+
 
             //Si le bitmap est valide
             if(thumbBitmap!=null){
+                //cacher le placeholder
+                if(placeholder.getVisibility()==View.VISIBLE){
+                    placeholder.setVisibility(View.GONE);
+                }
+                //charger l'image dans l'imageview
                 imgThumb.setImageBitmap(thumbBitmap);
+                Log.d(TAG,"recycled Bitmap");
             }
             //Sinon on lance le chargement
             else{
+                //Chargement de la miniature
                 pdfThumbTask=new LoadPDFThumbTask(itemView.getContext(),this,currentItem.getFile());
                 pdfThumbTask.execute();
+                Log.d(TAG,"Generating Bitmap");
             }
 
 
-            imgIcon.setImageResource(iconid);
 
         }
 
@@ -182,10 +198,13 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
      */
     public class LoadPDFThumbTask extends AsyncTask<Void,Void,Bitmap>{
 
+        String TAG=getClass().getSimpleName();
         Context context;
         ImageView intoView;
         FileViewHolder viewHolder;
+        View placeHolder;
         File pdfFile;
+        FileItem currentItem;
         PdfiumCore pdfiumCore;
 
         public LoadPDFThumbTask(Context context,FileViewHolder viewHolder,File pdfFile) {
@@ -193,21 +212,24 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
             this.intoView = viewHolder.imgThumb;
             this.viewHolder=viewHolder;
             this.pdfFile = pdfFile;
+            this.placeHolder=viewHolder.placeholder;
+            this.currentItem=viewHolder.currentItem;
             pdfiumCore=new PdfiumCore(context);
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            viewHolder.placeholder.setVisibility(View.VISIBLE);
+            placeHolder.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected Bitmap doInBackground(Void... params) {
 
-            Bitmap pdfthumb = viewHolder.currentItem.getThumbnailImage();
-            //On a deja une image de généré, on a pas besoin de la recharger
+            Bitmap pdfthumb = currentItem.getThumbnailImage();
+            //Si il y a deja une miniature on la reutilise tout de suite
             if(pdfthumb!=null){
+                Log.d(TAG,"recycled thumb");
                 return pdfthumb;
             }
 
@@ -220,7 +242,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
                 return null;
             }
 
-
         }
 
         @Override
@@ -231,9 +252,9 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             super.onPostExecute(bitmap);
-            viewHolder.placeholder.setVisibility(View.GONE);
+            placeHolder.setVisibility(View.GONE);
             //Sauvegarde du Bitmap dans le cache
-            viewHolder.currentItem.setThumbnailImage(bitmap);
+            currentItem.setThumbnailImage(bitmap);
             intoView.setImageBitmap(bitmap);
         }
     }
