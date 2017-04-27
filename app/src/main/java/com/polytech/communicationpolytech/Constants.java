@@ -7,4 +7,8 @@ package com.polytech.communicationpolytech;
 interface Constants {
 
     int passHash=1253867675;
+
+    int TYPE_PDF=0;
+    int TYPE_IMAGE=1;
+    int TYPE_VIDEO=2;
 }

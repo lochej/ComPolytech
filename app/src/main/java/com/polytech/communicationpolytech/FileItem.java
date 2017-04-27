@@ -18,6 +18,15 @@ public class FileItem {
     File file;
     View.OnClickListener listener;
     Bitmap thumbnailImage;
+    int type;
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public Bitmap getThumbnailImage() {
         return thumbnailImage;

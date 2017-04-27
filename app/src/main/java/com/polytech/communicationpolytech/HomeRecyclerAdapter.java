@@ -61,7 +61,7 @@ public class HomeRecyclerAdapter extends RecyclerView.Adapter<HomeRecyclerAdapte
             super(itemView);
             this.itemView=itemView;
             title=(TextView) itemView.findViewById(R.id.title);
-            imgThumb=(ImageView) itemView.findViewById(R.id.card_thumbnail);
+            imgThumb=(ImageView) itemView.findViewById(R.id.card_video);
             imgIcon=(ImageView) itemView.findViewById(R.id.card_icon);
 
         }

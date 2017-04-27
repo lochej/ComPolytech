@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.bumptech.glide.Glide;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -80,7 +79,7 @@ public class PolytechActivity extends AppCompatActivity {
             }
         }
         for(int i=0;i<recyclerView.getChildCount();i++){
-            FileRecyclerAdapter.FileViewHolder holder = (FileRecyclerAdapter.FileViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+            FileRecyclerAdapter.PdfViewHolder holder = (FileRecyclerAdapter.PdfViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
             if(holder.getPdfThumbTask() != null && holder.getPdfThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
                 holder.getPdfThumbTask().cancel(true);
             }
@@ -150,6 +149,8 @@ public class PolytechActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 });
+
+                itemtoAdd.setType(Constants.TYPE_PDF);
 
 
                 fileitems.add(itemtoAdd);

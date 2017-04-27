@@ -2,7 +2,6 @@ package com.polytech.communicationpolytech;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -16,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -28,7 +26,7 @@ import java.util.List;
  * Created by Jérémy on 07/04/2017.
  */
 
-public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapter.FileViewHolder> {
+public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapter.PdfViewHolder> {
 
     private List<FileItem> objectList;
     private LayoutInflater inflater;
@@ -41,48 +39,36 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
 
 
     @Override
-    public FileViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public PdfViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View view = inflater.inflate(R.layout.file_card_item,parent,false);
-        FileViewHolder holder=new FileViewHolder(view);
+        PdfViewHolder holder=new PdfViewHolder(view);
 
         return holder;
     }
 
     @Override
-    public void onViewDetachedFromWindow(FileViewHolder holder) {
-        super.onViewDetachedFromWindow(holder);
-        //If the view is detached from the screen, kill the asynctask no longer needed
-        /*
-        if(holder.pdfThumbTask !=null && holder.pdfThumbTask.getStatus() == AsyncTask.Status.RUNNING){
-            holder.pdfThumbTask.cancel(true);
-        }*/
+    public int getItemViewType(int position) {
+        // Just as an example, return 0 or 2 depending on position
+        // Note that unlike in ListView adapters, types don't have to be contiguous
+        return objectList.get(position).getType();
     }
 
     @Override
-    public void onViewRecycled(FileViewHolder holder) {
+    public void onViewRecycled(PdfViewHolder holder) {
         super.onViewRecycled(holder);
-
-        /*
-
-        //Kill the old asyntask if it is running
-        if(holder.pdfThumbTask !=null && holder.pdfThumbTask.getStatus() == AsyncTask.Status.RUNNING){
-            holder.pdfThumbTask.cancel(true);
-        }
-
-        */
 
         //Set a white background during loading of the new Task
         holder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(holder.imgThumb.getContext(),R.color.cardBackground)));
     }
 
     @Override
-    public void onViewAttachedToWindow(FileViewHolder holder) {
+    public void onViewAttachedToWindow(PdfViewHolder holder) {
         super.onViewAttachedToWindow(holder);
     }
 
     @Override
-    public void onBindViewHolder(FileViewHolder holder, int position) {
+    public void onBindViewHolder(PdfViewHolder holder, int position) {
         FileItem currentItem=objectList.get(position);
         holder.setData(currentItem,position);
     }
@@ -92,7 +78,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         return objectList.size();
     }
 
-    public class FileViewHolder extends RecyclerView.ViewHolder{
+    public class PdfViewHolder extends RecyclerView.ViewHolder{
 
         final String TAG=getClass().getSimpleName();
 
@@ -103,11 +89,11 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
 
-        public FileViewHolder(View itemView) {
+        public PdfViewHolder(View itemView) {
             super(itemView);
             this.itemView = itemView;
             title = (TextView) itemView.findViewById(R.id.title);
-            imgThumb = (ImageView) itemView.findViewById(R.id.card_thumbnail);
+            imgThumb = (ImageView) itemView.findViewById(R.id.card_video);
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
             placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
         }
@@ -139,9 +125,10 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
             }
             //Sinon on lance le chargement
             else{
-                //Chargement de la miniature
+                //Chargement de la miniatur
                 pdfThumbTask=new LoadPDFThumbTask(itemView.getContext(),this,currentItem.getFile());
                 pdfThumbTask.execute();
+
                 Log.d(TAG,"Generating Bitmap");
             }
 
@@ -202,13 +189,13 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
         String TAG=getClass().getSimpleName();
         Context context;
         ImageView intoView;
-        FileViewHolder viewHolder;
+        PdfViewHolder viewHolder;
         View placeHolder;
         File pdfFile;
         FileItem currentItem;
         PdfiumCore pdfiumCore;
 
-        public LoadPDFThumbTask(Context context,FileViewHolder viewHolder,File pdfFile) {
+        public LoadPDFThumbTask(Context context, PdfViewHolder viewHolder, File pdfFile) {
             this.context = context;
             this.intoView = viewHolder.imgThumb;
             this.viewHolder=viewHolder;
