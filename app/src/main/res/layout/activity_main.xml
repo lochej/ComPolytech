@@ -154,8 +154,8 @@
             android:layout_gravity="bottom|start"
             android:elevation="2dp"
             android:onClick="OnClickSecureAcess"
-            android:tint="@color/colorAccent"
-            app:srcCompat="@android:drawable/ic_lock_lock" />
+            app:srcCompat="@android:drawable/ic_lock_lock"
+            android:tint="@color/colorAccent"/>
 
     </FrameLayout>
 

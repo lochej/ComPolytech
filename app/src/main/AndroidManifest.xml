@@ -25,7 +25,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/HomeTheme" />
+            />
 
         <activity
             android:name=".PolytechActivity"
