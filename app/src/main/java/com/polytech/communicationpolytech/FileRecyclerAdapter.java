@@ -5,78 +5,36 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
+import com.bumptech.glide.Glide;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by Jérémy on 07/04/2017.
  */
 
-public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapter.PdfViewHolder> {
-
-    private List<FileItem> objectList;
-    private LayoutInflater inflater;
-
-    public FileRecyclerAdapter(Context context, List<FileItem> objectList) {
-        this.objectList=objectList;
-        inflater=LayoutInflater.from(context);
-    }
-
-
-
-    @Override
-    public PdfViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-        View view = inflater.inflate(R.layout.file_card_item,parent,false);
-        PdfViewHolder holder=new PdfViewHolder(view);
-
-        return holder;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        // Just as an example, return 0 or 2 depending on position
-        // Note that unlike in ListView adapters, types don't have to be contiguous
-        return objectList.get(position).getType();
-    }
-
-    @Override
-    public void onViewRecycled(PdfViewHolder holder) {
-        super.onViewRecycled(holder);
-
-        //Set a white background during loading of the new Task
-        holder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(holder.imgThumb.getContext(),R.color.cardBackground)));
-    }
-
-    @Override
-    public void onViewAttachedToWindow(PdfViewHolder holder) {
-        super.onViewAttachedToWindow(holder);
-    }
-
-    @Override
-    public void onBindViewHolder(PdfViewHolder holder, int position) {
-        FileItem currentItem=objectList.get(position);
-        holder.setData(currentItem,position);
-    }
-
-    @Override
-    public int getItemCount() {
-        return objectList.size();
-    }
+public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class PdfViewHolder extends RecyclerView.ViewHolder{
 
@@ -132,8 +90,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
                 Log.d(TAG,"Generating Bitmap");
             }
 
-
-
         }
 
         public LoadPDFThumbTask getPdfThumbTask() {
@@ -144,6 +100,237 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<FileRecyclerAdapte
             this.pdfThumbTask = pdfThumbTask;
         }
     }
+
+    public class ImageViewHolder extends RecyclerView.ViewHolder{
+
+
+        final String TAG=getClass().getSimpleName();
+
+        private TextView title;
+        //private TextView placeholder;
+        private ImageView imgThumb,imgIcon;
+        private FileItem currentItem;
+        private View itemView;
+
+        public ImageViewHolder(View itemView) {
+            super(itemView);
+            this.itemView = itemView;
+            title = (TextView) itemView.findViewById(R.id.title);
+            imgThumb = (ImageView) itemView.findViewById(R.id.card_video);
+            imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
+            //placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
+        }
+
+
+        public void setData(FileItem currentItem, int position) {
+
+            this.currentItem=currentItem;
+            int iconid = currentItem.getIconID();
+            String title = currentItem.getTitle();
+            View.OnClickListener clickListener = currentItem.getOnClickListener();
+            File imageFile=currentItem.getFile();
+
+            Glide.with(itemView.getContext()).fromFile().asBitmap().load(imageFile).into(imgThumb);
+
+            itemView.setOnClickListener(clickListener);
+            this.title.setText(title);
+
+            imgIcon.setImageResource(iconid);
+
+        }
+    }
+
+    public class VideoViewHolder extends RecyclerView.ViewHolder{
+
+
+        final String TAG=getClass().getSimpleName();
+
+        private TextView title;
+        //private TextView placeholder;
+        private ImageView imgThumb,imgIcon;
+        private VideoView videoView;
+        private FileItem currentItem;
+        private View itemView;
+        private Bundle savedState=new Bundle();
+
+        public VideoViewHolder(View itemView) {
+            super(itemView);
+            this.itemView = itemView;
+            title = (TextView) itemView.findViewById(R.id.title);
+            imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
+            videoView=(VideoView) itemView.findViewById(R.id.card_video);
+            //placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
+        }
+
+
+        public void setData(FileItem currentItem, int position) {
+
+            this.currentItem=currentItem;
+            int iconid = currentItem.getIconID();
+            String title = currentItem.getTitle();
+            View.OnClickListener clickListener = currentItem.getOnClickListener();
+            File videoFile=currentItem.getFile();
+
+
+            itemView.setOnClickListener(clickListener);
+            this.title.setText(title);
+
+            imgIcon.setImageResource(iconid);
+
+            videoView.setVideoPath(videoFile.getAbsolutePath());
+            MediaController controller=new MediaController(videoView.getContext());
+            videoView.setMediaController(controller);
+
+        }
+    }
+
+    public class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup{
+
+        FileRecyclerAdapter adapter;
+
+        public SpanSizeLookup(FileRecyclerAdapter adapter) {
+            this.adapter=adapter;
+        }
+
+        @Override
+        public int getSpanSize(int position) {
+            return adapter.objectList.get(position).getType() == Constants.TYPE_VIDEO ? 2 : 1 ;
+        }
+    }
+
+    public static Comparator<FileItem> fileItemComparator=new Comparator<FileItem>() {
+        @Override
+        public int compare(FileItem o1, FileItem o2) {
+
+            int type1=o1.getType();
+            int type2=o2.getType();
+            /*
+            if(type1==type2){
+                return 0;
+            }
+            */
+            //Remonte les vidéos en haut de la liste et laisse les autres inchang
+            if(type1==Constants.TYPE_VIDEO){
+                return -1;
+            }
+            if(type2==Constants.TYPE_VIDEO){
+                return 1;
+            }
+            return 0;
+        }
+    };
+
+    private List<FileItem> objectList;
+    private LayoutInflater inflater;
+
+    public FileRecyclerAdapter(Context context, List<FileItem> objectList) {
+        this.objectList=objectList;
+        Collections.sort(objectList,fileItemComparator);
+        inflater=LayoutInflater.from(context);
+    }
+
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view;
+        RecyclerView.ViewHolder holder;
+
+        switch (viewType){
+            case Constants.TYPE_IMAGE:
+
+                view = inflater.inflate(R.layout.file_card_item,parent,false);
+                holder=new ImageViewHolder(view);
+
+                return holder;
+
+            case Constants.TYPE_PDF:
+
+                view = inflater.inflate(R.layout.file_card_item,parent,false);
+                holder=new PdfViewHolder(view);
+
+                return holder;
+
+            case Constants.TYPE_VIDEO:
+
+                view = inflater.inflate(R.layout.video_card_item,parent,false);
+                holder=new VideoViewHolder(view);
+
+                return holder;
+
+            default:
+                return null;
+        }
+
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        // Just as an example, return 0 or 2 depending on position
+        // Note that unlike in ListView adapters, types don't have to be contiguous
+        return objectList.get(position).getType();
+    }
+
+    @Override
+    public void onViewRecycled(RecyclerView.ViewHolder holder) {
+        super.onViewRecycled(holder);
+
+        if(holder instanceof PdfViewHolder){
+            //Set a white background during loading of the new Task
+            PdfViewHolder pdfHolder=(PdfViewHolder) holder;
+            pdfHolder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(pdfHolder.imgThumb.getContext(),R.color.cardBackground)));
+        }
+
+
+    }
+
+    @Override
+    public void onViewAttachedToWindow(RecyclerView.ViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+
+        FileItem currentItem=objectList.get(position);
+
+        switch (currentItem.getType()){
+            case Constants.TYPE_IMAGE:
+
+                ImageViewHolder imageHolder=(ImageViewHolder) holder;
+                imageHolder.setData(currentItem,position);
+
+                break;
+            case Constants.TYPE_PDF:
+
+                PdfViewHolder pdfHolder=(PdfViewHolder) holder;
+                pdfHolder.setData(currentItem,position);
+
+                break;
+            case Constants.TYPE_VIDEO:
+
+
+
+                VideoViewHolder videoHolder=(VideoViewHolder) holder;
+
+                GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) videoHolder.itemView.getLayoutParams();
+
+
+                videoHolder.itemView.setLayoutParams(layoutParams);
+
+                videoHolder.setData(currentItem,position);
+
+                break;
+        }
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return objectList.size();
+    }
+
+
 
     /**
      * Genere la miniature dans un objet Bitmap à partir du fichier PDF donné dans pdfFile

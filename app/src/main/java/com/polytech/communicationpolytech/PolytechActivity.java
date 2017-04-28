@@ -10,6 +10,7 @@ import android.os.ParcelFileDescriptor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
@@ -78,12 +79,14 @@ public class PolytechActivity extends AppCompatActivity {
                 loadTask.cancel(true);
             }
         }
+        /*
         for(int i=0;i<recyclerView.getChildCount();i++){
             FileRecyclerAdapter.PdfViewHolder holder = (FileRecyclerAdapter.PdfViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
             if(holder.getPdfThumbTask() != null && holder.getPdfThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
                 holder.getPdfThumbTask().cancel(true);
             }
         }
+        */
     }
 
     public class LoadFilesTask extends AsyncTask<Void,Void,List<FileItem>>{
@@ -103,8 +106,18 @@ public class PolytechActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(List<FileItem> fileItems) {
-            FileRecyclerAdapter adapter=new FileRecyclerAdapter(PolytechActivity.this,fileItems);
+            final FileRecyclerAdapter adapter=new FileRecyclerAdapter(PolytechActivity.this,fileItems);
             recyclerView.setAdapter(adapter);
+
+            ((GridLayoutManager)recyclerView.getLayoutManager()).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    if(adapter.getItemViewType(position)== Constants.TYPE_VIDEO){
+                        return 2;
+                    };
+                    return 1;
+                }
+            });
         }
 
         @Override
@@ -132,28 +145,75 @@ public class PolytechActivity extends AppCompatActivity {
             ArrayList<FileItem> fileitems=new ArrayList<>();
 
             for(int i=0;i<foundFiles.length;i++){
-                final FileItem itemtoAdd=new FileItem(
-                        foundFiles[i].getName(),
-                        R.drawable.ic_picture_as_pdf_black_24dp,
-                        foundFiles[i]);
 
-                itemtoAdd.setListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                File fileToAdd=foundFiles[i];
 
-                        intent.setDataAndType(
-                                Uri.parse("file://" +itemtoAdd.getFile().getAbsolutePath()),
-                                "application/pdf");
+                int fileType=getTypeByFile(fileToAdd);
 
-                        startActivity(intent);
-                    }
-                });
+                final FileItem itemtoAdd;
 
-                itemtoAdd.setType(Constants.TYPE_PDF);
+                switch (fileType){
+                    case Constants.TYPE_IMAGE:
+
+                        itemtoAdd=new FileItem(
+                                fileToAdd.getName(),
+                                R.drawable.ic_image_black_24dp,
+                                fileToAdd);
+
+                        itemtoAdd.setListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                            }
+                        });
+
+                        itemtoAdd.setType(Constants.TYPE_IMAGE);
+
+                        fileitems.add(itemtoAdd);
+
+                        break;
+
+                    case Constants.TYPE_PDF:
+
+                        itemtoAdd=new FileItem(
+                                fileToAdd.getName(),
+                                R.drawable.ic_picture_as_pdf_black_24dp,
+                                fileToAdd);
+
+                        itemtoAdd.setListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW);
+
+                                intent.setDataAndType(
+                                        Uri.parse("file://" +itemtoAdd.getFile().getAbsolutePath()),
+                                        "application/pdf");
+
+                                startActivity(intent);
+                            }
+                        });
+
+                        itemtoAdd.setType(Constants.TYPE_PDF);
+
+                        fileitems.add(itemtoAdd);
+
+                        break;
+                    case Constants.TYPE_VIDEO:
+
+                        itemtoAdd=new FileItem(
+                                fileToAdd.getName(),
+                                R.drawable.ic_video_library_black_24dp,
+                                fileToAdd);
 
 
-                fileitems.add(itemtoAdd);
+                        itemtoAdd.setType(Constants.TYPE_VIDEO);
+
+                        fileitems.add(itemtoAdd);
+
+                        break;
+                    default:
+                }
+
 
 
                 //Log.d("load task",foundFiles[i].getAbsolutePath());
@@ -163,29 +223,44 @@ public class PolytechActivity extends AppCompatActivity {
             return fileitems;
         }
 
-        Bitmap getPdfThumbnail(File pdfFile) throws IOException {
+        int getTypeByFile(File f){
 
-            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(Uri.fromFile(pdfFile), "r");;
-            int pageNum = 0;
-            PdfDocument pdfDocument = pdfiumCore.newDocument(fd);
+            String fileName=f.getName();
+            int extensionDotIndex=fileName.lastIndexOf('.');
 
-            pdfiumCore.openPage(pdfDocument, pageNum);
+            //Pas d'extensions c'est un dossier
+            if(extensionDotIndex == -1){
+                return Constants.TYPE_FOLDER;
+            }
+            //Le point est à la fin donc il n'y a pas d'extensions ensuite, c'est un dossier
+            if(extensionDotIndex == fileName.length()-1){
+                return Constants.TYPE_FOLDER;
+            }
 
-            int width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNum);
-            int height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNum);
+            //recupération du texte après le point
+            String extension=fileName.substring(extensionDotIndex+1).toUpperCase();
 
-            Bitmap bitmap = Bitmap.createBitmap(width, height,
-                    Bitmap.Config.ARGB_8888);
+            switch (extension){
+                case Constants.EXTENSION_GIF:
+                    return Constants.TYPE_IMAGE;
 
-            pdfiumCore.renderPageBitmap(pdfDocument, bitmap, pageNum, 0, 0,
-                    width, height);
+                case Constants.EXTENSION_JPG:
+                    return Constants.TYPE_IMAGE;
 
+                case Constants.EXTENSION_PNG:
+                    return Constants.TYPE_IMAGE;
 
-            pdfiumCore.closeDocument(pdfDocument); // important!
+                case Constants.EXTENSION_MP4:
+                    return Constants.TYPE_VIDEO;
 
-            return bitmap;
+                case Constants.EXTENSION_PDF:
+                    return Constants.TYPE_PDF;
 
+            }
+
+            return Constants.TYPE_UNKNOWN;
         }
+
     }
 
 }
