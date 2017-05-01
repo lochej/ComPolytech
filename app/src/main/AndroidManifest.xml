@@ -11,8 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:windowSoftInputMode="adjustResize" >
-
+        android:windowSoftInputMode="adjustResize">
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
@@ -22,31 +21,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".PolytechActivity" />
+        <!-- android:theme="@style/HomeTheme" -->
 
-        <activity
-            android:name=".MainActivity"
-            />
-
-        <activity
-            android:name=".PolytechActivity"
-            android:theme="@style/HomeTheme" />
-
-        <activity
-            android:name=".ReseauActivity" />
-
-        <activity
-            android:name=".ReservedSpaceActivity" />
-
+        <activity android:name=".ReseauActivity" />
+        <activity android:name=".ReservedSpaceActivity" />
         <activity
             android:name=".ContactActivity"
-            android:windowSoftInputMode="adjustResize"/>
-
-        <activity
-            android:name=".CandidatDialog" />
-
-        <activity
-            android:name=".CandidatActivity" />
-
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".CandidatDialog" />
+        <activity android:name=".CandidatActivity" />
+        <activity android:name=".VideoViewerActivity"
+            android:theme="@style/VideoViewerTheme"></activity>
     </application>
 
 </manifest>

@@ -19,4 +19,7 @@ interface Constants {
     String EXTENSION_PNG="PNG";
     String EXTENSION_JPG="JPG";
     String EXTENSION_GIF="GIF";
+
+    String EXTRA_VIDEO_PATH="lien_vers_video";
+    String EXTRA_VIDEO_MILLIS="state_video";
 }

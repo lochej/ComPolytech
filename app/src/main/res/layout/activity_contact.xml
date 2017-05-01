@@ -10,86 +10,95 @@
 
 
 
-    <LinearLayout
-        android:id="@+id/contact_content"
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/contact_scroll_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginRight="@dimen/windowsMargins"
-        android:layout_marginLeft="@dimen/windowsMargins"
-        android:orientation="vertical"
-        >
+        android:layout_height="match_parent">
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/contact_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/contact_hint"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textSize="24sp"
-            android:text="@string/contact_hint_intro"/>
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/windowsMargins"
+            android:layout_marginLeft="@dimen/windowsMargins"
+            android:orientation="vertical"
+            >
 
-        <View
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:id="@+id/contact_divider"
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:elevation="3dp"
-            android:background="@color/headerDivider"/>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/contact_hint"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textSize="24sp"
+                android:text="@string/contact_hint_intro"/>
 
-        <TextView
-            android:id="@+id/contact_titleName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/Name"
-            style="@android:style/TextAppearance.DeviceDefault.Large"
-            />
+            <View
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:id="@+id/contact_divider"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:elevation="3dp"
+                android:background="@color/headerDivider"/>
 
-        <EditText
-            android:id="@+id/contact_nameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/Name"
-            android:inputType="textPersonName"
-            />
+            <TextView
+                android:id="@+id/contact_titleName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/Name"
+                style="@android:style/TextAppearance.DeviceDefault.Large"
+                />
 
-        <TextView
+            <EditText
+                android:id="@+id/contact_nameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/Name"
+                android:inputType="textPersonName"
+                />
 
-            android:id="@+id/contact_titleFirstName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/First_name"
-            style="@android:style/TextAppearance.DeviceDefault.Large"
-            />
+            <TextView
 
-        <EditText
-            android:id="@+id/contact_firstNameEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/First_name"
-            android:inputType="textPersonName"
-            />
+                android:id="@+id/contact_titleFirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/First_name"
+                style="@android:style/TextAppearance.DeviceDefault.Large"
+                />
 
-        <TextView
-            android:id="@+id/contact_titleEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/e_mail"
-            style="@android:style/TextAppearance.DeviceDefault.Large"
-            />
+            <EditText
+                android:id="@+id/contact_firstNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/First_name"
+                android:inputType="textPersonName"
+                />
 
-        <EditText
-            android:id="@+id/contact_mailEditText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="@string/mail_example"
-            android:inputType="textEmailAddress"
-            />
+            <TextView
+                android:id="@+id/contact_titleEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/e_mail"
+                style="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+
+            <EditText
+                android:id="@+id/contact_mailEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/mail_example"
+                android:inputType="textEmailAddress"
+                />
 
 
-    </LinearLayout>
+        </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+
 
 
     <android.support.design.widget.FloatingActionButton
@@ -100,7 +109,7 @@
         android:clickable="true"
         android:src="@drawable/ic_check_black_24dp"
         android:tint="@android:color/white"
-        app:layout_anchor="@id/contact_content"
+        app:layout_anchor="@id/contact_scroll_container"
         app:layout_anchorGravity="bottom|end|right"
         app:backgroundTint="@color/greenLock"
         app:rippleColor="@android:color/white"

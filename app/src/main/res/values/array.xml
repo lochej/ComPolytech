@@ -2,5 +2,8 @@
 <resources>
 
 
+    <string-array name="newsletter_option">
+        
+    </string-array>
 
 </resources>

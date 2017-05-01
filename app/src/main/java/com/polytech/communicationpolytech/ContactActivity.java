@@ -6,6 +6,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -13,8 +14,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class ContactActivity extends AppCompatActivity {
+
+    public final String TAG=ContactActivity.this.getClass().getSimpleName();
 
     EditText nom;
     EditText prenom;
@@ -45,6 +50,7 @@ public class ContactActivity extends AppCompatActivity {
 
         content=(CoordinatorLayout) findViewById(R.id.contact_main_coordinator);
 
+
     }
 
     @Override
@@ -61,7 +67,8 @@ public class ContactActivity extends AppCompatActivity {
     }
 
     public void OnConfirmForm(View v){
-        String data;
+
+        String[] data=new String[3];
         String nom=this.nom.getText().toString();
         String prenom=this.prenom.getText().toString();
         String mail=this.mail.getText().toString();
@@ -70,6 +77,17 @@ public class ContactActivity extends AppCompatActivity {
             Snackbar snack=Snackbar.make(content,"OK",Snackbar.LENGTH_SHORT);
             snack.getView().setBackgroundColor(ContextCompat.getColor(v.getContext(),R.color.greenLock));
             snack.show();
+
+            data[0]=prenom;
+            data[1]=nom;
+            data[2]=mail;
+
+            try {
+                saveCSVFile(null,false,data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
         else {
 
@@ -83,6 +101,7 @@ public class ContactActivity extends AppCompatActivity {
             snack.show();
         }
 
+
         //data=String.format("%s;%s;%s;%s;%s", nom,prenom,mail,"","");
         //Toast.makeText(v.getContext(),data,Toast.LENGTH_SHORT).show();
     }
@@ -92,5 +111,22 @@ public class ContactActivity extends AppCompatActivity {
     }
 
 
+    public void saveCSVFile(File intoFile,boolean append,String[] line) throws IOException {
+
+        File externalDir=getExternalFilesDir(null);
+
+        File csvFile=new File(externalDir.getAbsolutePath() + "/formulaire.csv");
+
+        if(!csvFile.exists()){
+            CSVformatter.writeHeaderToOutputStream(csvFile,CSVformatter.FORMAT_GOOGLE);
+            CSVformatter.writeLineDataToFile(csvFile,line,CSVformatter.FORMAT_GOOGLE);
+        }
+        else{
+            CSVformatter.writeLineDataToFile(csvFile,line,CSVformatter.FORMAT_GOOGLE);
+        }
+
+
+
+    }
 
 }

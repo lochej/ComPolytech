@@ -1,18 +1,25 @@
 package com.polytech.communicationpolytech;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.IntentCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -23,6 +30,7 @@ import android.widget.VideoView;
 import com.bumptech.glide.Glide;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
+import com.volokh.danylo.video_player_manager.ui.VideoPlayerView;
 
 import java.io.File;
 import java.io.IOException;
@@ -151,7 +159,9 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private VideoView videoView;
         private FileItem currentItem;
         private View itemView;
+        private MediaController mediaController;
         private Bundle savedState=new Bundle();
+        private FloatingActionButton playFab;
 
         public VideoViewHolder(View itemView) {
             super(itemView);
@@ -159,11 +169,33 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             title = (TextView) itemView.findViewById(R.id.title);
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
             videoView=(VideoView) itemView.findViewById(R.id.card_video);
-            //placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
+            mediaController = new MediaController(itemView.getContext());
+            playFab=(FloatingActionButton) itemView.findViewById(R.id.card_videoPlayFab);
+            playFab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    videoView.start();
+                    playFab.setVisibility(View.GONE);
+                }
+            });
+
+            videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    playFab.setVisibility(View.VISIBLE);
+
+
+                }
+            });
+
+            videoView.setMediaController(mediaController);
+
+
+
         }
 
 
-        public void setData(FileItem currentItem, int position) {
+        public void setData(final FileItem currentItem, int position) {
 
             this.currentItem=currentItem;
             int iconid = currentItem.getIconID();
@@ -172,14 +204,27 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             File videoFile=currentItem.getFile();
 
 
-            itemView.setOnClickListener(clickListener);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent videoPlayer=new Intent(videoView.getContext(),VideoViewerActivity.class);
+                    videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,videoView.getCurrentPosition());
+                    videoPlayer.putExtra(Constants.EXTRA_VIDEO_PATH,currentItem.getFile().getAbsolutePath());
+
+                    videoView.getContext().startActivity(videoPlayer);
+                }
+            });
+
+
             this.title.setText(title);
 
             imgIcon.setImageResource(iconid);
 
+
             videoView.setVideoPath(videoFile.getAbsolutePath());
-            MediaController controller=new MediaController(videoView.getContext());
-            videoView.setMediaController(controller);
+
+
+
 
         }
     }

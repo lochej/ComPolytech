@@ -20,20 +20,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
-        <VideoView
-            android:id="@+id/card_video"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
+        <FrameLayout
+            android:id="@+id/card_video_container"
             android:layout_alignParentTop="true"
-            android:layout_gravity="center"
-            android:layout_centerInParent="true"
-            />
-        
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <VideoView
+                android:id="@+id/card_video"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_gravity="center"
+                />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/card_videoPlayFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fabSize="normal"
+                app:layout_anchor="@id/card_video"
+                android:layout_gravity="center"
+                app:useCompatPadding="true"
+                app:elevation="2dp"
+                android:src="@drawable/ic_play_arrow_black_24dp"
+                />
+
+        </FrameLayout>
+
+
 
         <View
             android:id="@+id/card_divider"
-            android:layout_below="@id/card_video"
+            android:layout_below="@id/card_video_container"
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="@android:color/darker_gray"

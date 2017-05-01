@@ -12,4 +12,6 @@
     <color name="headerDivider">@color/colorAccent</color>
     <color name="polytech">#009edf</color>
     <color name="polytechDark">#0088bf</color>
+
+    <color name="actionBarTranslucentBlack">#77000000</color>
 </resources>

@@ -15,4 +15,21 @@ public class ExampleUnitTest {
         assertEquals(4, 2 + 2);
     }
 
+    @Test
+    public void printHeader(){
+        String[] headers=CSVformatter.headerOutlook;
+
+        String[] data={"PRENOM","NOM","EMAIL"};
+
+        CSVformatter.writeLineToOutputStream(System.out,data,CSVformatter.FORMAT_GOOGLE);
+
+        CSVformatter.writeLineToOutputStream(System.out,data,CSVformatter.FORMAT_OUTLOOK);
+
+        //System.out.println(CSVformatter.formatGoogle);
+        //System.out.println(CSVformatter.formatOutlook);
+
+
+
+    }
+
 }

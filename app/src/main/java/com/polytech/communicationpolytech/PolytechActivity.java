@@ -41,6 +41,11 @@ public class PolytechActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
+        progressDialog=new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+
         recyclerView=(RecyclerView) findViewById(R.id.polytech_recyclerview);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setSaveEnabled(true);
@@ -79,14 +84,24 @@ public class PolytechActivity extends AppCompatActivity {
                 loadTask.cancel(true);
             }
         }
-        /*
+
+        //Makes sure that every remaining PdfLoadTask is cancelled onStop.
         for(int i=0;i<recyclerView.getChildCount();i++){
-            FileRecyclerAdapter.PdfViewHolder holder = (FileRecyclerAdapter.PdfViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
-            if(holder.getPdfThumbTask() != null && holder.getPdfThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
-                holder.getPdfThumbTask().cancel(true);
+
+            RecyclerView.ViewHolder holder=recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+
+            //Si c'est un Holder PDF
+            if(holder instanceof FileRecyclerAdapter.PdfViewHolder){
+
+                FileRecyclerAdapter.PdfViewHolder pdfHolder=(FileRecyclerAdapter.PdfViewHolder) holder;
+
+                if(pdfHolder.getPdfThumbTask() != null && pdfHolder.getPdfThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
+                    pdfHolder.getPdfThumbTask().cancel(true);
+                }
             }
+
         }
-        */
+
     }
 
     public class LoadFilesTask extends AsyncTask<Void,Void,List<FileItem>>{
@@ -102,6 +117,8 @@ public class PolytechActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            //Show the placeholder Dialog
+            progressDialog.show();
         }
 
         @Override
@@ -118,6 +135,9 @@ public class PolytechActivity extends AppCompatActivity {
                     return 1;
                 }
             });
+
+            //Hide the placeholder progress dialog
+            progressDialog.hide();
         }
 
         @Override

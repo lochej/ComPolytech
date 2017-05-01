@@ -26,5 +26,6 @@
     <string name="contact_hint_intro">Remplissez ce formulaire de contact si vous souhaitez être recontacté. Ces informations seront utilisés à titre informatif uniquement. Les champs (*) sont obligatoires.</string>
     <string name="incorrect_email_adress">Addresse E-mail incorrecte.</string>
     <string name="loading">Chargement en cours...</string>
+    <string name="video">Vidéo</string>
 
 </resources>
