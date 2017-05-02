@@ -166,7 +166,7 @@ public class PolytechActivity extends AppCompatActivity {
 
             for(int i=0;i<foundFiles.length;i++){
 
-                File fileToAdd=foundFiles[i];
+                final File fileToAdd=foundFiles[i];
 
                 int fileType=getTypeByFile(fileToAdd);
 
@@ -183,7 +183,11 @@ public class PolytechActivity extends AppCompatActivity {
                         itemtoAdd.setListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                Intent startImageViewer=new Intent(v.getContext(),ImageViewerActivity.class);
 
+                                startImageViewer.putExtra(Constants.EXTRA_VIDEO_PATH,fileToAdd);
+
+                                v.getContext().startActivity(startImageViewer);
                             }
                         });
 

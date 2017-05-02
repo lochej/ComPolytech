@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
+import java.io.File;
+
 public class VideoViewerActivity extends AppCompatActivity {
 
 
@@ -31,13 +33,13 @@ public class VideoViewerActivity extends AppCompatActivity {
         }
 
 
-        String videoPath="";
-        int millis=0;
 
 
 
         videoView=(VideoView) findViewById(R.id.videoViewer_videoview);
         mediaController = new MediaController(this);
+
+
         playFab=(FloatingActionButton) findViewById(R.id.videoViewer_playFab);
         playFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,20 +59,30 @@ public class VideoViewerActivity extends AppCompatActivity {
         videoView.setMediaController(mediaController);
 
 
+
+
         //Récupération des données de la vidéo cliquée
         if(getIntent()!=null){
             Intent data=getIntent();
-            videoPath=data.getStringExtra(Constants.EXTRA_VIDEO_PATH);
-            millis=data.getIntExtra(Constants.EXTRA_VIDEO_MILLIS,0);
+            final File videoFile=(File) data.getSerializableExtra(Constants.EXTRA_VIDEO_PATH);
+            final int millis=data.getIntExtra(Constants.EXTRA_VIDEO_MILLIS,0);
 
+            String newTitle=String.format("%s: %s",getString(R.string.video),videoFile.getName());
 
-            videoView.setVideoPath(videoPath);
-            videoView.seekTo(millis);
+            setTitle(newTitle);
+
+            playFab.setVisibility(View.GONE);
+            videoView.setVideoPath(videoFile.getAbsolutePath());
+
+            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.seekTo(millis);
+                    mp.start();
+                }
+            });
+
         }
-
-
-
-
     }
 
     @Override

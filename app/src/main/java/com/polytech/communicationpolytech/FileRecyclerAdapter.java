@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -30,7 +31,6 @@ import android.widget.VideoView;
 import com.bumptech.glide.Glide;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
-import com.volokh.danylo.video_player_manager.ui.VideoPlayerView;
 
 import java.io.File;
 import java.io.IOException;
@@ -136,11 +136,19 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             int iconid = currentItem.getIconID();
             String title = currentItem.getTitle();
             View.OnClickListener clickListener = currentItem.getOnClickListener();
-            File imageFile=currentItem.getFile();
+            final File imageFile=currentItem.getFile();
 
             Glide.with(itemView.getContext()).fromFile().asBitmap().load(imageFile).into(imgThumb);
 
-            itemView.setOnClickListener(clickListener);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent viewer=new Intent(v.getContext(),ImageViewerActivity.class);
+                    viewer.putExtra(Constants.EXTRA_IMAGE_PATH,imageFile);
+
+                    v.getContext().startActivity(viewer);
+                }
+            });
             this.title.setText(title);
 
             imgIcon.setImageResource(iconid);
@@ -160,17 +168,25 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private FileItem currentItem;
         private View itemView;
         private MediaController mediaController;
-        private Bundle savedState=new Bundle();
+        private ImageButton fullscreen;
         private FloatingActionButton playFab;
 
         public VideoViewHolder(View itemView) {
             super(itemView);
             this.itemView = itemView;
+
             title = (TextView) itemView.findViewById(R.id.title);
+
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
+
             videoView=(VideoView) itemView.findViewById(R.id.card_video);
+
             mediaController = new MediaController(itemView.getContext());
+
+            fullscreen = (ImageButton) itemView.findViewById(R.id.card_fullscreen);
+
             playFab=(FloatingActionButton) itemView.findViewById(R.id.card_videoPlayFab);
+
             playFab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -183,12 +199,17 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     playFab.setVisibility(View.VISIBLE);
-
-
                 }
             });
 
-            videoView.setMediaController(mediaController);
+            //videoView.setMediaController(mediaController);
+
+            videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.seekTo(0);
+                }
+            });
 
 
 
@@ -203,13 +224,31 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             View.OnClickListener clickListener = currentItem.getOnClickListener();
             File videoFile=currentItem.getFile();
 
-
+            /* Ajout du bouton fulllscreen
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    videoView.pause();
                     Intent videoPlayer=new Intent(videoView.getContext(),VideoViewerActivity.class);
                     videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,videoView.getCurrentPosition());
                     videoPlayer.putExtra(Constants.EXTRA_VIDEO_PATH,currentItem.getFile().getAbsolutePath());
+
+                    videoView.getContext().startActivity(videoPlayer);
+                }
+            });
+            */
+
+            fullscreen.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    videoView.pause();
+                    Intent videoPlayer=new Intent(videoView.getContext(),VideoViewerActivity.class);
+                    videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,videoView.getCurrentPosition());
+                    videoPlayer.putExtra(Constants.EXTRA_VIDEO_PATH,currentItem.getFile());
+
+                    //On eteint la video dans la card et on la lance dans l'activité donc on reset le playButton
+                    playFab.setVisibility(View.VISIBLE);
 
                     videoView.getContext().startActivity(videoPlayer);
                 }
@@ -222,6 +261,8 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
             videoView.setVideoPath(videoFile.getAbsolutePath());
+
+
 
 
 

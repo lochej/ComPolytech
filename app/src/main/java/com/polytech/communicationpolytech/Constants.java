@@ -22,4 +22,5 @@ interface Constants {
 
     String EXTRA_VIDEO_PATH="lien_vers_video";
     String EXTRA_VIDEO_MILLIS="state_video";
+    String EXTRA_IMAGE_PATH="path_image";
 }
