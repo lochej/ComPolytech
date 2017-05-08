@@ -270,7 +270,33 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    public class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup{
+    public class SeparatorViewHolder extends RecyclerView.ViewHolder{
+
+
+        final String TAG=getClass().getSimpleName();
+
+        private TextView title;
+        private FileItem currentItem;
+        private View itemView;
+
+        public SeparatorViewHolder(View itemView) {
+            super(itemView);
+            this.itemView = itemView;
+            title = (TextView) itemView.findViewById(R.id.separator_title);
+        }
+
+
+        public void setData(FileItem currentItem, int position) {
+
+            this.currentItem=currentItem;
+            String title=currentItem.getTitle();
+
+            this.title.setText(title);
+
+        }
+    }
+
+    public static class SpanSizeLookup extends GridLayoutManager.SpanSizeLookup{
 
         FileRecyclerAdapter adapter;
 
@@ -280,7 +306,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         @Override
         public int getSpanSize(int position) {
-            return adapter.objectList.get(position).getType() == Constants.TYPE_VIDEO ? 2 : 1 ;
+            return (adapter.objectList.get(position).getType() == Constants.TYPE_VIDEO) || (adapter.objectList.get(position).getType() == Constants.TYPE_SEPARATOR) ? 2 : 1 ;
         }
     }
 
@@ -344,6 +370,13 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 return holder;
 
+            case Constants.TYPE_SEPARATOR:
+
+                view = inflater.inflate(R.layout.titled_separator,parent,false);
+                holder=new SeparatorViewHolder(view);
+
+                return holder;
+
             default:
                 return null;
         }
@@ -395,8 +428,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 break;
             case Constants.TYPE_VIDEO:
 
-
-
                 VideoViewHolder videoHolder=(VideoViewHolder) holder;
 
                 GridLayoutManager.LayoutParams layoutParams = (GridLayoutManager.LayoutParams) videoHolder.itemView.getLayoutParams();
@@ -405,6 +436,19 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 videoHolder.itemView.setLayoutParams(layoutParams);
 
                 videoHolder.setData(currentItem,position);
+
+                break;
+
+            case Constants.TYPE_SEPARATOR:
+
+                SeparatorViewHolder separatorHolder=(SeparatorViewHolder) holder;
+
+                GridLayoutManager.LayoutParams separatorlayoutParams = (GridLayoutManager.LayoutParams) separatorHolder.itemView.getLayoutParams();
+
+
+                separatorHolder.itemView.setLayoutParams(separatorlayoutParams);
+
+                separatorHolder.setData(currentItem,position);
 
                 break;
         }

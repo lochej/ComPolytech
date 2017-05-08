@@ -31,14 +31,20 @@
             android:name=".ContactActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".CandidatDialog" />
-        <activity android:name=".CandidatActivity" />
-
+        <activity
+            android:name=".CandidatActivity"
+            android:label="@string/title_activity_candidat"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".VideoViewerActivity"
             android:theme="@style/ViewerTheme" />
-
-        <activity android:name=".ImageViewerActivity"
-            android:theme="@style/ViewerTheme"></activity>
+        <activity
+            android:name=".ImageViewerActivity"
+            android:theme="@style/ViewerTheme" />
+        <activity
+            android:name=".Polytech2Activity"
+            android:label="@string/title_activity_polytech2"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

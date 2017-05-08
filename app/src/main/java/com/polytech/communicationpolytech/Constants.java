@@ -13,6 +13,7 @@ interface Constants {
     int TYPE_VIDEO=2;
     int TYPE_FOLDER=3;
     int TYPE_UNKNOWN=4;
+    int TYPE_SEPARATOR=5;
 
     String EXTENSION_PDF="PDF";
     String EXTENSION_MP4="MP4";

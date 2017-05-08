@@ -81,12 +81,12 @@ public class HomeItem {
         HomeItem polytech=new HomeItem();
         polytech.setCardID(0);
         polytech.setTitle(mainActivity.getString(R.string.polytech_tours));
-        polytech.setThumbID(R.drawable.polytech);
+        polytech.setThumbID(R.drawable.img_bde);
         polytech.setIconID(R.drawable.ic_smallpolytech);
         polytech.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent startPolytechActivity=new Intent(v.getContext(),PolytechActivity.class);
+                Intent startPolytechActivity=new Intent(v.getContext(),Polytech2Activity.class);
                 v.getContext().startActivity(startPolytechActivity);
             }
         });
@@ -94,7 +94,7 @@ public class HomeItem {
 
         HomeItem reseau=new HomeItem();
         reseau.setCardID(1);
-        reseau.setThumbID(R.drawable.ic_smallpolytech);
+        reseau.setThumbID(R.drawable.reseau_polytech);
         reseau.setTitle(mainActivity.getString(R.string.reseau_polytech));
         reseau.setIconID(R.drawable.ic_smallpolytech);
         reseau.setOnClickListener(new View.OnClickListener() {
@@ -108,7 +108,7 @@ public class HomeItem {
 
         HomeItem candidat=new HomeItem();
         candidat.setCardID(2);
-        candidat.setThumbID(R.drawable.img_candidat);
+        candidat.setThumbID(R.drawable.img_cafet);
         candidat.setIconID(R.drawable.ic_scholarship);
         candidat.setTitle(mainActivity.getString(R.string.espace_candidat));
         candidat.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +122,7 @@ public class HomeItem {
 
         HomeItem quizz=new HomeItem();
         quizz.setCardID(3);
-        quizz.setThumbID(R.drawable.polytech);
+        quizz.setThumbID(R.drawable.img_quizz);
         quizz.setTitle(mainActivity.getString(R.string.quizz));
         quizz.setIconID(R.drawable.ic_question);
         quizz.setOnClickListener(new View.OnClickListener() {
