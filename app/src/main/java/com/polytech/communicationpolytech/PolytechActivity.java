@@ -30,7 +30,7 @@ public class PolytechActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setSaveEnabled(true);
 
-        loadTask=new LoadFilesTask(this,recyclerView);
+        loadTask=new LoadFilesTask(this,recyclerView,null);
         loadTask.execute();
 
 

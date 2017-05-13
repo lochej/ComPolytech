@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -23,21 +24,18 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     ProgressDialog progressDialog;
     RecyclerView recyclerView;
 
-    public LoadFilesTask(Context context,RecyclerView toFillRecyclerView) {
+    public LoadFilesTask(Context context,RecyclerView toFillRecyclerView,@Nullable ProgressDialog progressDialog) {
         this.context=context;
         this.recyclerView=toFillRecyclerView;
 
-        progressDialog=new ProgressDialog(context);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.setMessage(context.getString(R.string.loading));
+        this.progressDialog=progressDialog;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
         //Show the placeholder Dialog
-        progressDialog.show();
+        if(progressDialog!=null) progressDialog.show();
     }
 
     @Override
@@ -60,7 +58,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
         ((GridLayoutManager)recyclerView.getLayoutManager()).setSpanSizeLookup(new FileRecyclerAdapter.SpanSizeLookup(adapter));
 
         //Hide the placeholder progress dialog
-        progressDialog.hide();
+        if(progressDialog!=null) progressDialog.hide();
     }
 
     @Override

@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -34,17 +35,20 @@ import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListene
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -52,6 +56,8 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class ReservedSpaceActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
+
+
 
     GoogleAccountCredential mCredential;
     private TextView mOutputText;
@@ -70,10 +76,187 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { DriveScopes.DRIVE_READONLY };
 
+    private static java.io.File sdRootFolder;
+
     private List<File> files_list;
 
-    private TreeMap<String,File> files_Treemap=new TreeMap<>();
+    /**
+     * Treemap ID drive, FileDrive
+     * stocke dans le cache les fichiers du DRIVE avec leurs metadata
+     */
+    private TreeMap<String,File> Drive_Treemap =new TreeMap<>();
 
+    /**
+     * Treemap ID Drive, FileIO
+     * stocke dans le cache l'emplacement où les fichiers du DRIVE devrait arriver
+     */
+    private TreeMap<String,java.io.File> Storage_Treemap =new TreeMap<>();
+
+
+    /**
+     * Recupere les ID des fichiers du DRIVE qui n'existent pas et qui ne sont pas des dossiers
+     * Assume que les treemap sont correctent et bien générés
+     * @return liste: liste des ID DRIVE des fichiers à telecharger
+     */
+    private List<String> getFilesToDownload(){
+
+        ArrayList<String> toDownloadFiles=new ArrayList<>();
+
+        //Regarder dans le stockage si les fichiers existent deja
+        for(String ID : Storage_Treemap.keySet()){
+
+            java.io.File StorageFile = Storage_Treemap.get(ID);
+
+            //récupération du fichier Drive pour checker le mimetype
+            File DriveFile = Drive_Treemap.get(ID);
+
+            //Si le fichier n'existe pas, on le rajoute à la liste des telechargement
+            //Si le fichier n'est pas un dossier
+            if( !StorageFile.exists() && !(DriveFile.getMimeType().equals("application/vnd.google-apps.folder") ) ){
+                //Ajout de l'ID du fichier à telecharger
+                toDownloadFiles.add(ID);
+            }
+
+        }
+
+        return toDownloadFiles;
+    }
+
+
+    /**
+     * Doit etre appelee apres avoir cree Drive_Treemap et Storage_Treemap
+     * Telecharge le fichier dont l'ID drive est passé en parametre
+     * Utilise le Storage_Treemap.get(ID) pour définir l'emplacement où telecharger le fichier
+     * @param ID: l'id drive du fichier à DL
+     * @param driveService: le service Google Drive à utiliser pour le telechargement
+     * @throws IOException :Erreur de telechargement où dossiers inexistant
+     */
+    private void downloadDriveFileToStorage(com.google.api.services.drive.Drive driveService,String ID) throws IOException {
+
+
+        java.io.File StorageFile=Storage_Treemap.get(ID);
+
+        java.io.File StorageFolder = StorageFile.getParentFile();
+
+        //Generation des dossiers de stockage si besoin
+        if(!StorageFolder.exists()){
+            if(StorageFolder.mkdirs()){
+                //Reussi a créer les dossiers
+            }
+            else{
+                throw new RuntimeException("Echec de la création des dossiers:"+StorageFolder.getAbsolutePath());
+            }
+        }
+
+        //Telechargement du fichier
+
+        OutputStream outputStream = new FileOutputStream(StorageFile);
+        Drive.Files.Get request=driveService.files().get(ID);
+        //request.getMediaHttpDownloader().setProgressListener(new DownloadProgressListener());
+        request.executeMediaAndDownloadTo(outputStream);
+
+        outputStream.close();
+
+
+    }
+
+    /**
+     * Returns the parent storage path on the Google Drive
+     * @param mService: drive service
+     * @param f: the file to query google drive path
+     * @return string: the path string
+     */
+    private String getParentDriveStorageFilePath(com.google.api.services.drive.Drive mService, File f) throws IOException {
+
+        StringBuilder pathBuilder=new StringBuilder();
+
+        List<File> parents=createFileTreeList(mService,f);
+        //On parcours la liste à l'envers car la liste contient les parent du plus loitain au plus proche de la racine
+        for(int j=parents.size()-1;j>=0;j--){
+            File parent=parents.get(j);
+            //Ajouter le nom du dossier au chemin dans la carte SD
+            pathBuilder.append(parent.getName()).append("/");
+            Log.d("PathBuilder",parents.get(j).getName());
+        }
+        Log.d("PathBuilder",pathBuilder.toString());
+
+
+        return pathBuilder.toString();
+    }
+
+    /**
+     * Crée une liste contenant tout les parents de file
+     *
+     * @param file : fichier dont on veut récupérer les parents
+     * @return : liste des parents, vide si aucun parents, sinon contient tout les parents jusqu'a la racine du drive.
+     * Attention les parents sont oragnisés du plus loin au plus proche de la racine
+     *
+     * @throws IOException
+     */
+    private List<File> createFileTreeList(com.google.api.services.drive.Drive mService,File file) throws IOException {
+
+        //La liste qui va contenir tout les parents de File.
+        List<File> treeList=new ArrayList<>();
+
+        File tempFile=file;
+
+        //Tant que le fichier regardé a un parent, l'ajouter a la liste.
+        while(tempFile.getParents()!=null){
+
+            //stocker l'id du parent.
+            String parentid=tempFile.getParents().get(0);
+
+
+            //recuperer les infos du parent
+            File parent= Drive_Treemap.get(parentid);
+
+
+
+            //Si on a pas déjà le metadata du fichier stocké dans la treemap, tanpis on le retelecharge
+            //Ou on passe car c'est le dernier dossier (MON DRIVE)
+            if(parent==null){
+                break;
+                //parent=mService.files().get(parentid).setFields("name,id,parents").execute();
+                //Log.d("FileTreeCreator","Contacting Drive API to get:"+parent.getName());
+            }
+
+
+            //Swap du tempFile pour utiliser le parent et rechercher son parent.
+            tempFile=parent;
+
+
+            //Ajouter le parent à la liste.
+            treeList.add(tempFile);
+
+        }
+
+        return treeList;
+    }
+
+    /**
+     * Fills the Storage_Treemap using the currently filled Drive_Treemap
+     * @param mService : The service to use to retrieve file name in case it is not already in the Drive_Treemap
+     * @throws IOException
+     */
+    private void fillStorageMapFromDriveMap(com.google.api.services.drive.Drive mService) throws IOException {
+
+        for(String ID : Drive_Treemap.keySet()){
+
+            File DriveFile=Drive_Treemap.get(ID);
+
+            String driveParentPaths=getParentDriveStorageFilePath(mService,DriveFile);
+
+            java.io.File StorageFolder=new java.io.File(sdRootFolder,driveParentPaths);
+
+            java.io.File StorageFile= new java.io.File(StorageFolder, DriveFile.getName());
+
+            Storage_Treemap.put(ID,StorageFile);
+
+            Log.d("FillStorageMap",StorageFile.getAbsolutePath());
+
+        }
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +267,69 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         if(getSupportActionBar()!=null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+
+        sdRootFolder=getExternalFilesDir(null);
+
+
+        mOutputText=(TextView) findViewById(R.id.reserved_output_textview);
+        mCallApiButton=(Button) findViewById(R.id.reserved_callapi);
+        mDlApiButton=(Button) findViewById(R.id.reserved_download);
+
+        mCallApiButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallApiButton.setEnabled(false);
+                mOutputText.setText("");
+                getResultsFromApi();
+                mCallApiButton.setEnabled(true);
+            }
+        });
+
+        mDlApiButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(files_list!=null){
+                    //File f=files_list.get(Integer.parseInt(mEditText.getText().toString()));
+
+
+                    String[] ids={files_list.get(3).getId(),files_list.get(4).getId()};
+
+                    //File[] files= {f};
+
+
+
+                    if(ids!=null){
+                        //Toast.makeText(MainActivity.this,f.getName(),Toast.LENGTH_LONG)
+                        //        .show();
+                        Toast.makeText(ReservedSpaceActivity.this,"Demarrage telechargement",Toast.LENGTH_LONG)
+                                .show();
+
+                        new DLfileTask(mCredential)
+                                .execute(ids);
+                    }
+                }
+                else{
+                    Toast.makeText(ReservedSpaceActivity.this,"Pas de files recup",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+
+        mProgress = new ProgressDialog(this);
+        mProgress.setMessage("Calling Drive API ...");
+
+        mDlProgress = new ProgressDialog(this);
+        mDlProgress.setMax(100);
+        mDlProgress.setIndeterminate(false);
+        mDlProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        mDlProgress.setMessage("Downloading file ...");
+
+        // Initialize credentials and service object.
+        mCredential = GoogleAccountCredential.usingOAuth2(
+                getApplicationContext(), Arrays.asList(SCOPES))
+                .setBackOff(new ExponentialBackOff());
 
     }
 
@@ -319,10 +565,9 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
      * Param1 file to store files in
      *
      */
-    private class DLfileTask extends AsyncTask<File,Integer,Void> {
+    private class DLfileTask extends AsyncTask<String,Integer,Void> {
 
         private com.google.api.services.drive.Drive mService=null;
-        private java.io.File sdFolder=null;
 
 
         public DLfileTask(GoogleAccountCredential credential) {
@@ -333,8 +578,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                     .setApplicationName("Drive API Android Quickstart")
                     .build();
 
-            sdFolder= ReservedSpaceActivity.this.getExternalFilesDir(null);
-
         }
 
         @Override
@@ -344,40 +587,34 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         }
 
         @Override
-        protected Void doInBackground(File... files) {
+        protected Void doInBackground(String... files) {
 
             mDlProgress.setMax(files.length);
 
             for(int i=0;i<files.length;i++){
 
-                File f=files[i];
-
-                StringBuilder pathBuilder=new StringBuilder();
+                String id=files[i];
 
                 try {
-                    List<File> parents=createFileTreeList(f);
+                    downloadDriveFileToStorage(mService,id);
 
-                    //On parcours la liste à l'envers car la liste contient les parent du plus loitain au plus proche de la racine
-                    for(int j=parents.size()-1;j>=0;j--){
-                        File parent=parents.get(j);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    cancel(true);
+                }
 
-                        //Ajouter le nom du dossier au chemin dans la carte SD
-                        pathBuilder.append(parent.getName()).append("/");
-
-                        Log.d("main",parents.get(j).getName());
-                    }
-
-                    Log.d("main",pathBuilder.toString());
-
+                publishProgress(i+1);
+                /*
+                String DriveStoragePath="";
+                try {
+                    DriveStoragePath= getParentDriveStorageFilePath(mService,f);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
-
-
                 //Creation du dossier de stockage
 
-                java.io.File storageFolder=new java.io.File(String.format("%s/%s",sdFolder.getPath(),pathBuilder.toString()));
+                java.io.File storageFolder=new java.io.File(String.format("%s/%s",sdFolder.getPath(),DriveStoragePath));
 
                 if(!storageFolder.exists()){
                     if(storageFolder.mkdirs()){
@@ -411,8 +648,9 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                     e.printStackTrace();
                     cancel(true);
                 }
+                */
 
-                //publishProgress(i+1);
+                //
 
             }
 
@@ -485,7 +723,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
 
                 //recuperer les infos du parent
-                File parent=files_Treemap.get(parentid);
+                File parent= Drive_Treemap.get(parentid);
 
                 //Si on a pas déjà le metadata du fichier stocké dans la treemap, tanpis on le retelecharge
                 if(parent==null){
@@ -537,10 +775,11 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
     public class DownloadProgressListener implements MediaHttpDownloaderProgressListener {
 
+        public final String TAG=getClass().getSimpleName();
         @Override
         public void progressChanged(MediaHttpDownloader downloader){
 
-            Log.d("main",downloader.getDownloadState()+"");
+            Log.d(TAG,downloader.getDownloadState()+"");
 
             switch (downloader.getDownloadState()){
 
@@ -552,14 +791,14 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
                     mDlProgress.setProgress(progress);
 
-                    Log.d("main","Download progress: " + progress +"%");
+                    Log.d(TAG,"Download progress: " + progress +"%");
                     break;
                 //Called after download is complete
                 case MEDIA_COMPLETE:
                     //Add code for download completion
 
                     mDlProgress.setProgress(100);
-                    Log.d("main","Download finished");
+                    Log.d(TAG,"Download finished");
                     break;
             }
 
@@ -609,24 +848,47 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         private List<String> getDataFromApi() throws IOException {
             // Get a list of up to 10 files.
             List<String> fileInfo = new ArrayList<String>();
-            FileList result = mService.files().list()
-                    .setPageSize(10)
-                    .setFields("nextPageToken, files(id, name,parents,mimeType)")
-                    .execute();
-            List<File> files = result.getFiles();
-            files_list=files;
-            if (files != null) {
-                for (File file : files) {
 
-                    //Ajouter les metadata à la TreeMap
-                    files_Treemap.put(file.getId(),file);
+            String pageToken = null;
+            //Lire tout le google drive
+            do {
+                //Récuperer les fichier de la page
+                FileList result = mService.files().list()
+                        .setFields("nextPageToken, files(id,name,parents,mimeType)")
+                        .setPageToken(pageToken)
+                        .execute();
 
 
-                    fileInfo.add(String.format("%s (%s)\n",
-                            file.getName(), file.getId()));
+                //Ajouter les fichiers à la Treemap
+
+                List<File> files = result.getFiles();
+                files_list=files;
+                if (files != null) {
+                    for (File file : files) {
+
+                        //Ajouter les metadata à la TreeMap
+                        Drive_Treemap.put(file.getId(),file);
+
+
+                        fileInfo.add(String.format("%s (%s)\n",
+                                file.getName(), file.getId()));
+                    }
+
                 }
 
+                pageToken = result.getNextPageToken();
+            } while (pageToken != null);
+
+
+            fillStorageMapFromDriveMap(mService);
+
+            List<String> ToDlid=getFilesToDownload();
+
+            for(String id: ToDlid){
+                File fi=Drive_Treemap.get(id);
+                Log.d("TODLFiles",fi.getName());
             }
+
             return fileInfo;
         }
 

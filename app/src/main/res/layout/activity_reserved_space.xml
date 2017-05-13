@@ -6,4 +6,37 @@
     android:layout_height="match_parent"
     tools:context="com.polytech.communicationpolytech.ReservedSpaceActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/reserved_callapi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Call drive api" />
+
+        <Button
+            android:id="@+id/reserved_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Download Files" />
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/reserved_output_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="TextView" />
+        </android.support.v4.widget.NestedScrollView>
+
+
+
+    </LinearLayout>
+
+
 </android.support.design.widget.CoordinatorLayout>

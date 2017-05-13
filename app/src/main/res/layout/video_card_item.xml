@@ -27,14 +27,50 @@
             android:layout_height="wrap_content"
             android:background="@android:color/black">
 
+            <TextView
+                android:id="@+id/card_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:text="@string/loading"
+                android:gravity="center"
+                android:textStyle="bold|italic"
+                android:visibility="gone"
+                />
 
+            <ImageView
+                android:id="@+id/card_thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                />
+
+            <!--
+            <com.polytech.communicationpolytech.TextureVideoView
+                android:id="@+id/card_texturevideoview"
+                android:layout_width="wrap_content"
+                android:layout_height="300dp"
+                android:layout_gravity="center"
+                />
+
+
+
+            <TextureView
+                android:id="@+id/card_textureview"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:visibility="gone"
+                android:layout_gravity="center"/>
 
             <VideoView
                 android:id="@+id/card_video"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_gravity="center"
+                android:visibility="gone"
                 />
+
+                -->
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/card_videoPlayFab"
@@ -48,6 +84,7 @@
                 android:src="@drawable/ic_play_arrow_black_24dp"
                 />
 
+            <!--
             <ImageButton
                 android:id="@+id/card_fullscreen"
                 android:layout_width="wrap_content"
@@ -57,6 +94,7 @@
                 android:background="@android:color/transparent"
                 android:tint="@android:color/white"
                 android:padding="12dp"/>
+                -->
 
         </FrameLayout>
 

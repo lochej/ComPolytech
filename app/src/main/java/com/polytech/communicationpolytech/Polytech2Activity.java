@@ -1,5 +1,6 @@
 package com.polytech.communicationpolytech;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ public class Polytech2Activity extends AppCompatActivity {
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
+    ProgressDialog progressDialog;
 
     private ViewPager mViewPager;
 
@@ -50,6 +52,11 @@ public class Polytech2Activity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        progressDialog=new ProgressDialog(this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
 
 
     }
@@ -111,10 +118,12 @@ public class Polytech2Activity extends AppCompatActivity {
 
             recyclerView=(RecyclerView) rootView.findViewById(R.id.frag_polytech_recyclerview);
 
-            loadTask =new LoadFilesTask(rootView.getContext(),recyclerView).execute(this.getContext().getExternalFilesDir(null));
+            loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(this.getContext().getExternalFilesDir(null));
 
             return rootView;
         }
+
+
 
         @Override
         public void onStop() {
