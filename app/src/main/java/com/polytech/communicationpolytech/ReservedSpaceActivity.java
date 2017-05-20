@@ -5,20 +5,33 @@ import android.accounts.AccountManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -42,8 +55,6 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -58,14 +69,46 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class ReservedSpaceActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
 
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+
+    private ViewPager mViewPager;
 
     GoogleAccountCredential mCredential;
     private TextView mOutputText;
     private Button mCallApiButton;
     private Button mDlApiButton;
     private EditText mEditText;
-    ProgressDialog mProgress;
+    ProgressDialog mCheckForUpdatesProgress;
     ProgressDialog mDlProgress;
+    AlertDialog mDownloadStartDialog;
+    CoordinatorLayout mMainCoordinatorLayout;
+    AlertDialog.Builder builder;
+
+    DialogInterface.OnClickListener dlpositiveListener=new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+
+            List<String> toDlFiles=getFilesToDownload(true);
+
+            new DLfileTask(mCredential).execute(toDlFiles.get(0), toDlFiles.get(1));//toDlFiles.toArray(new String[]{})[0]);
+
+            dialog.dismiss();
+
+        }
+    };
+
+    View.OnClickListener dlallListener=new View.OnClickListener(){
+        @Override
+        public void onClick(View v) {
+            List<String> toDlFiles=getFilesToDownload(false);
+
+            new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{})[0]);
+
+            //dialog.dismiss();
+        }
+    };
+
+
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
@@ -75,6 +118,8 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     private static final String BUTTON_TEXT = "Call Drive API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
     private static final String[] SCOPES = { DriveScopes.DRIVE_READONLY };
+
+    private static final String APP_NAME="Communication Polytech App";
 
     private static java.io.File sdRootFolder;
 
@@ -93,17 +138,20 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     private TreeMap<String,java.io.File> Storage_Treemap =new TreeMap<>();
 
 
+    //###################### DRIVE FILE SYNC METHODS ###########################
+
     /**
      * Recupere les ID des fichiers du DRIVE qui n'existent pas et qui ne sont pas des dossiers
      * Assume que les treemap sont correctent et bien générés
+     * @param PickNonExistantFiles: true: prends uniquement les fichiers qui n'existent pas dans le stockage, false: prends tout les fichiers qui ne sont pas des dossiers
      * @return liste: liste des ID DRIVE des fichiers à telecharger
      */
-    private List<String> getFilesToDownload(){
+    private List<String> getFilesToDownload(boolean PickNonExistantFiles){
 
         ArrayList<String> toDownloadFiles=new ArrayList<>();
 
         //Regarder dans le stockage si les fichiers existent deja
-        for(String ID : Storage_Treemap.keySet()){
+        for(String ID : Drive_Treemap.keySet()){
 
             java.io.File StorageFile = Storage_Treemap.get(ID);
 
@@ -112,9 +160,24 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
             //Si le fichier n'existe pas, on le rajoute à la liste des telechargement
             //Si le fichier n'est pas un dossier
-            if( !StorageFile.exists() && !(DriveFile.getMimeType().equals("application/vnd.google-apps.folder") ) ){
-                //Ajout de l'ID du fichier à telecharger
-                toDownloadFiles.add(ID);
+            if( !(DriveFile.getMimeType().equals("application/vnd.google-apps.folder") ) ){
+
+                //On ne veut que les fichiers qui ne sont pas deja telechargees
+                if(PickNonExistantFiles){
+                    //Si le fichier n'a pas été telecharger
+                    if(!StorageFile.exists()){
+                        //Ajout de l'ID du fichier à telecharger
+                        toDownloadFiles.add(ID);
+                        Log.d("FILESNonExistant",DriveFile.getName());
+                    }
+
+                }
+                //Si on veut tout les fichiers telechargeable
+                else{
+                    toDownloadFiles.add(ID);
+                    Log.d("FILESExistant",DriveFile.getName());
+                }
+
             }
 
         }
@@ -258,79 +321,103 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
     }
 
+    /**
+     * Va contacter le Google Drive si possible où emmettre des popup.
+     * Scan le google drive, donne le nombre de fichiers telechargeable et demander à l'utilisateur s'il veut telecharger
+     *
+     */
+    private void syncWithGoogle(){
+
+        //Regarder sur le Google Drive les fichiers à DL
+        //Donc remplir les treemaps
+        getResultsFromApi();
+
+
+        //Ouvrir un popup avec le nb de fichiers à DL et si on veut DL
+
+        //Lancer le DL si on accepte.
+
+    }
+
+    //########################## APP LIFECYCLE ##########################
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reserved_space);
         setTitle(R.string.reserved_space);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         if(getSupportActionBar()!=null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
 
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
+
+        mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.reserved_activity_container);
+
+
         sdRootFolder=getExternalFilesDir(null);
 
 
-        mOutputText=(TextView) findViewById(R.id.reserved_output_textview);
-        mCallApiButton=(Button) findViewById(R.id.reserved_callapi);
-        mDlApiButton=(Button) findViewById(R.id.reserved_download);
+        //Mise en place du dialog de checking Google Drive
+        mCheckForUpdatesProgress = new ProgressDialog(this);
+        mCheckForUpdatesProgress.setMessage(getString(R.string.check_for_updates_drive));
 
-        mCallApiButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallApiButton.setEnabled(false);
-                mOutputText.setText("");
-                getResultsFromApi();
-                mCallApiButton.setEnabled(true);
-            }
-        });
-
-        mDlApiButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(files_list!=null){
-                    //File f=files_list.get(Integer.parseInt(mEditText.getText().toString()));
-
-
-                    String[] ids={files_list.get(3).getId(),files_list.get(4).getId()};
-
-                    //File[] files= {f};
-
-
-
-                    if(ids!=null){
-                        //Toast.makeText(MainActivity.this,f.getName(),Toast.LENGTH_LONG)
-                        //        .show();
-                        Toast.makeText(ReservedSpaceActivity.this,"Demarrage telechargement",Toast.LENGTH_LONG)
-                                .show();
-
-                        new DLfileTask(mCredential)
-                                .execute(ids);
-                    }
-                }
-                else{
-                    Toast.makeText(ReservedSpaceActivity.this,"Pas de files recup",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-
-
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage("Calling Drive API ...");
-
+        //Mise en place du Dialog à afficher lors des téléchargement
         mDlProgress = new ProgressDialog(this);
         mDlProgress.setMax(100);
         mDlProgress.setIndeterminate(false);
         mDlProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mDlProgress.setMessage("Downloading file ...");
+        mDlProgress.setTitle(getString(R.string.downloading_Files));
+        mDlProgress.setMessage("");
+
+        builder=new AlertDialog.Builder(this);
+        builder.setTitle("Mise à jour disponible");
+        builder.setPositiveButton("Télécharger les nouveaux fichiers", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(Drive_Treemap !=null && Storage_Treemap !=null){
+
+                }
+                List<String> toDlFiles=getFilesToDownload(true);
+
+                new DLfileTask(mCredential).execute(toDlFiles.get(0), toDlFiles.get(1));//toDlFiles.toArray(new String[]{})[0]);
+
+                dialog.dismiss();
+
+            }
+        });
+
+        builder.setNegativeButton("Plus tard",null);
+
+
+
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
 
+    }
+
+    private void showSnackBar(String message,int length){
+        Snackbar.make(mMainCoordinatorLayout,message,length).show();
+    }
+
+    private void showSnackBar(int stringid, int length){
+        Snackbar.make(mMainCoordinatorLayout, stringid,length).show();
     }
 
     @Override
@@ -358,63 +445,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void syncWithGoogle(){
-
-    }
-
-    /**
-     * Attempt to call the API, after verifying that all the preconditions are
-     * satisfied. The preconditions are: Google Play Services installed, an
-     * account was selected and the device currently has online access. If any
-     * of the preconditions are not satisfied, the app will prompt the user as
-     * appropriate.
-     */
-    private void getResultsFromApi() {
-        if (! isGooglePlayServicesAvailable()) {
-            acquireGooglePlayServices();
-        } else if (mCredential.getSelectedAccountName() == null) {
-            chooseAccount();
-        } else if (! isDeviceOnline()) {
-            mOutputText.setText("No network connection available.");
-        } else {
-            new MakeRequestTask(mCredential).execute();
-        }
-    }
-
-    /**
-     * Attempts to set the account used with the API credentials. If an account
-     * name was previously saved it will use that one; otherwise an account
-     * picker dialog will be shown to the user. Note that the setting the
-     * account to use with the credentials object requires the app to have the
-     * GET_ACCOUNTS permission, which is requested here if it is not already
-     * present. The AfterPermissionGranted annotation indicates that this
-     * function will be rerun automatically whenever the GET_ACCOUNTS permission
-     * is granted.
-     */
-    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
-    private void chooseAccount() {
-        if (EasyPermissions.hasPermissions(
-                this, Manifest.permission.GET_ACCOUNTS)) {
-            String accountName = getPreferences(Context.MODE_PRIVATE)
-                    .getString(PREF_ACCOUNT_NAME, null);
-            if (accountName != null) {
-                mCredential.setSelectedAccountName(accountName);
-                getResultsFromApi();
-            } else {
-                // Start a dialog from which the user can choose an account
-                startActivityForResult(
-                        mCredential.newChooseAccountIntent(),
-                        REQUEST_ACCOUNT_PICKER);
-            }
-        } else {
-            // Request the GET_ACCOUNTS permission via a user dialog
-            EasyPermissions.requestPermissions(
-                    this,
-                    "This app needs to access your Google account (via Contacts).",
-                    REQUEST_PERMISSION_GET_ACCOUNTS,
-                    Manifest.permission.GET_ACCOUNTS);
-        }
-    }
 
     /**
      * Called when an activity launched here (specifically, AccountPicker
@@ -505,6 +535,225 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         // Do nothing.
     }
 
+
+    /**
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            // Return a ConfigFragment (defined as a static inner class below).
+
+            if(position==0){
+                return ConfigFragment.newInstance(position + 1,ReservedSpaceActivity.this);
+            }
+
+            return RecyclerViewFileFragment.newInstance(position+1,getExternalFilesDir(null));
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Configuration";
+                case 1:
+                    return "Documents Réservés";
+
+            }
+            return null;
+        }
+    }
+
+    /**
+     * A placeholder fragment containing a simple view.
+     */
+    public static class ConfigFragment extends Fragment {
+
+        TextView mOutputText;
+        Button mCallApiButton;
+        Button mDlApiButton;
+        Button mClearStorageButton;
+        Button mShareCSVButton;
+        Button mClearCSVButton;
+
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        private static final String ARG_SECTION_NUMBER = "section_number";
+
+        private ReservedSpaceActivity parentActivity;
+
+        public ReservedSpaceActivity getParentActivity() {
+            return parentActivity;
+        }
+
+        public void setParentActivity(ReservedSpaceActivity parentActivity) {
+            this.parentActivity = parentActivity;
+        }
+
+        public ConfigFragment() {
+        }
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        public static ConfigFragment newInstance(int sectionNumber,ReservedSpaceActivity parentActivity) {
+            ConfigFragment fragment = new ConfigFragment();
+            Bundle args = new Bundle();
+            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            fragment.setArguments(args);
+            fragment.setParentActivity(parentActivity);
+            fragment.setRetainInstance(true);
+            return fragment;
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+
+
+
+            View rootView = inflater.inflate(R.layout.fragment_reserved_config, container, false);
+
+            mOutputText=(TextView) rootView.findViewById(R.id.reserved_output_textview);
+            mCallApiButton=(Button) rootView.findViewById(R.id.reserved_callapi);
+            mDlApiButton=(Button) rootView.findViewById(R.id.reserved_download);
+            mClearStorageButton=(Button) rootView.findViewById(R.id.reserved_reset_storage);
+            mShareCSVButton = (Button) rootView.findViewById(R.id.reserved_export_csv);
+            mClearCSVButton = (Button) rootView.findViewById(R.id.reserved_reset_csv);
+
+
+
+            mCallApiButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    parentActivity.mCallApiButton.setEnabled(false);
+                    parentActivity.mOutputText.setText("");
+                    parentActivity.getResultsFromApi();
+                    parentActivity.mCallApiButton.setEnabled(true);
+                }
+            });
+
+            mDlApiButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(parentActivity.files_list!=null){
+                        //File f=files_list.get(Integer.parseInt(mEditText.getText().toString()));
+
+
+                        String[] ids={parentActivity.files_list.get(0).getId(),parentActivity.files_list.get(1).getId(),parentActivity.files_list.get(3).getId(),parentActivity.files_list.get(4).getId()};
+
+                        //File[] files= {f};
+
+
+
+                        if(ids!=null){
+                            //Toast.makeText(MainActivity.this,f.getName(),Toast.LENGTH_LONG)
+                            //        .show();
+                            Toast.makeText(parentActivity,"Demarrage telechargement",Toast.LENGTH_LONG)
+                                    .show();
+
+                            parentActivity.new DLfileTask(parentActivity.mCredential)
+                                    .execute(ids);
+                        }
+                    }
+                    else{
+                        Toast.makeText(parentActivity,"Pas de files recup",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+            parentActivity.mOutputText=mOutputText;
+            parentActivity.mDlApiButton=mDlApiButton;
+            parentActivity.mCallApiButton=mCallApiButton;
+
+            return rootView;
+        }
+
+
+
+        @Override
+        public void onStop() {
+            super.onStop();
+        }
+
+
+    }
+
+    //############################# HANDLING GOOGLE API #####################################
+
+    /**
+     * Attempt to call the API, after verifying that all the preconditions are
+     * satisfied. The preconditions are: Google Play Services installed, an
+     * account was selected and the device currently has online access. If any
+     * of the preconditions are not satisfied, the app will prompt the user as
+     * appropriate.
+     */
+    private void getResultsFromApi() {
+        if (! isGooglePlayServicesAvailable()) {
+            acquireGooglePlayServices();
+        } else if (mCredential.getSelectedAccountName() == null) {
+            chooseAccount();
+        } else if (! isDeviceOnline()) {
+            mOutputText.setText("No network connection available.");
+            showSnackBar("No network connection available.",Snackbar.LENGTH_LONG);
+        } else {
+            new MakeRequestTask(mCredential).execute();
+        }
+    }
+
+    /**
+     * Attempts to set the account used with the API credentials. If an account
+     * name was previously saved it will use that one; otherwise an account
+     * picker dialog will be shown to the user. Note that the setting the
+     * account to use with the credentials object requires the app to have the
+     * GET_ACCOUNTS permission, which is requested here if it is not already
+     * present. The AfterPermissionGranted annotation indicates that this
+     * function will be rerun automatically whenever the GET_ACCOUNTS permission
+     * is granted.
+     */
+    @AfterPermissionGranted(REQUEST_PERMISSION_GET_ACCOUNTS)
+    private void chooseAccount() {
+        if (EasyPermissions.hasPermissions(
+                this, Manifest.permission.GET_ACCOUNTS)) {
+            String accountName = getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null);
+            if (accountName != null) {
+                mCredential.setSelectedAccountName(accountName);
+                getResultsFromApi();
+            } else {
+                // Start a dialog from which the user can choose an account
+                startActivityForResult(
+                        mCredential.newChooseAccountIntent(),
+                        REQUEST_ACCOUNT_PICKER);
+            }
+        } else {
+            // Request the GET_ACCOUNTS permission via a user dialog
+            EasyPermissions.requestPermissions(
+                    this,
+                    "This app needs to access your Google account (via Contacts).",
+                    REQUEST_PERMISSION_GET_ACCOUNTS,
+                    Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+
+
     /**
      * Checks whether the device currently has a network connection.
      * @return true if the device has a network connection, false otherwise.
@@ -561,13 +810,19 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     }
 
 
+
+    //################################ ASYNC TASKS #################################
+
+
     /**
      * Param1 file to store files in
      *
      */
-    private class DLfileTask extends AsyncTask<String,Integer,Void> {
+    private class DLfileTask extends AsyncTask<String,Bundle,Void> {
 
         private com.google.api.services.drive.Drive mService=null;
+        private final String bundleIndex="index";
+        private final String bundlerFileName ="filename";
 
 
         public DLfileTask(GoogleAccountCredential credential) {
@@ -581,9 +836,15 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
+        protected void onProgressUpdate(Bundle... values) {
             super.onProgressUpdate(values);
-            mDlProgress.setProgress(values[0]);
+
+            Bundle progressValues=values[0];
+            int index=progressValues.getInt(bundleIndex);
+            String filename=progressValues.getString(bundlerFileName);
+            mDlProgress.setMessage(filename);
+            mDlProgress.setProgress(index);
+
         }
 
         @Override
@@ -595,6 +856,12 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
                 String id=files[i];
 
+                Bundle progressValues=new Bundle(2);
+                progressValues.putString(bundlerFileName,Drive_Treemap.get(id).getName());
+                progressValues.putInt(bundleIndex,i);
+
+                publishProgress(progressValues);
+
                 try {
                     downloadDriveFileToStorage(mService,id);
 
@@ -603,7 +870,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                     cancel(true);
                 }
 
-                publishProgress(i+1);
+
                 /*
                 String DriveStoragePath="";
                 try {
@@ -654,91 +921,13 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
             }
 
+            Bundle progressValues=new Bundle(2);
+            progressValues.putString(bundlerFileName,"Finalisation...");
+            progressValues.putInt(bundleIndex,files.length);
+
+            publishProgress(progressValues);
+
             return null;
-        }
-
-        private List<String> getParentsNameFromFile(File child) throws IOException{
-
-            File fileOnline=mService.files().get(child.getId())
-                    .setFields("parents")
-                    .execute();
-
-            return getParentsNameFromID(fileOnline.getParents());
-
-        }
-
-
-        private List<String> getParentsNameFromID(List<String> parents) throws IOException{
-            if(parents==null){
-                return null;
-            }
-
-            List<String> names=new ArrayList<>();
-
-            for(int i=0;i<parents.size();i++){
-
-                names.add( getFileNameFromID( parents.get(i) ) );
-            }
-            return names;
-
-        }
-
-        private String getFileNameFromID(String driveID) throws IOException{
-            File folderfile=mService.files().get(driveID).setFields("name").execute();
-            return folderfile.getName();
-        }
-
-        private boolean makeParentsDir(List<String> parentsNames){
-
-            java.io.File externalDir=getExternalFilesDir(null);
-
-            for(int i=0;i<parentsNames.size();i++){
-                String parentName=parentsNames.get(i);
-
-            }
-            return false;
-        }
-
-        /**
-         * Crée une liste contenant tout les parents de file
-         *
-         * @param file : fichier dont on veut récupérer les parents
-         * @return : liste des parents, vide si aucun parents, sinon contient tout les parents jusqu'a la racine du drive.
-         * Attention les parents sont oragnisés du plus loin au plus proche de la racine
-         *
-         * @throws IOException
-         */
-        private List<File> createFileTreeList(File file) throws IOException {
-
-            //La liste qui va contenir tout les parents de File.
-            List<File> treeList=new ArrayList<>();
-
-            File tempFile=file;
-
-            //Tant que le fichier regardé a un parent, l'ajouter a la liste.
-            while(tempFile.getParents()!=null){
-
-                //stocker l'id du parent.
-                String parentid=tempFile.getParents().get(0);
-
-
-                //recuperer les infos du parent
-                File parent= Drive_Treemap.get(parentid);
-
-                //Si on a pas déjà le metadata du fichier stocké dans la treemap, tanpis on le retelecharge
-                if(parent==null){
-                    parent=mService.files().get(parentid).setFields("name,id,parents").execute();
-                }
-
-                //Swap du tempFile pour utiliser le parent et rechercher son parent.
-                tempFile=parent;
-
-                //Ajouter le parent à la liste.
-                treeList.add(tempFile);
-
-            }
-
-            return treeList;
         }
 
 
@@ -753,6 +942,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             mDlProgress.hide();
+            showSnackBar("Téléchargement terminé",Snackbar.LENGTH_LONG);
             Toast.makeText(ReservedSpaceActivity.this,"FILE DOWNLOADED OK",Toast.LENGTH_SHORT).show();
         }
 
@@ -766,6 +956,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         protected void onCancelled() {
             super.onCancelled();
             mDlProgress.hide();
+            showSnackBar("Tout les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_LONG);
             Toast.makeText(ReservedSpaceActivity.this,"FILE NOT DOWNLOADED KOOOOO",Toast.LENGTH_SHORT).show();
         }
     }
@@ -882,12 +1073,27 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
             fillStorageMapFromDriveMap(mService);
 
-            List<String> ToDlid=getFilesToDownload();
+            /*
+            //Get files which doesn't exist currently
+            List<String> ToDlid=getFilesToDownload(true);
+
+            //ToDlid=getDownloadableFiles();
 
             for(String id: ToDlid){
                 File fi=Drive_Treemap.get(id);
-                Log.d("TODLFiles",fi.getName());
+                Log.d("TODLFiles1",fi.getName());
             }
+
+            //Get all downloaded files regardless they exist or not
+            List<String> ToDlid2=getFilesToDownload(false);
+
+            //ToDlid=getDownloadableFiles();
+
+            for(String id: ToDlid2){
+                File fi=Drive_Treemap.get(id);
+                Log.d("TODLFiles2",fi.getName());
+            }
+            */
 
             return fileInfo;
         }
@@ -896,12 +1102,32 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         @Override
         protected void onPreExecute() {
             mOutputText.setText("");
-            mProgress.show();
+            mCheckForUpdatesProgress.show();
         }
 
         @Override
         protected void onPostExecute(List<String> output) {
-            mProgress.hide();
+            mCheckForUpdatesProgress.hide();
+
+            List<String> toDlFiles=getFilesToDownload(true);
+
+
+
+            DialogFragment dialog=new DialogConfirmDownload();
+            Bundle args= new Bundle();
+            args.putString(DialogConfirmDownload.ARG_MESSAGE_STRING,
+                    "Il y a " + toDlFiles.size() + " nouveaux fichiers disponibles au téléchargement.");
+
+
+            dialog.setArguments(args);
+
+
+            //builder.setMessage("Il y a " + toDlFiles.size() + " nouveaux fichiers disponibles");
+            //dialog.setMessage("Il y a " + toDlFiles.size() + " nouveaux fichiers disponibles");
+            //builder.create().show();
+
+            dialog.show(getSupportFragmentManager(),"DialogConfirmDownload");
+
             if (output == null || output.size() == 0) {
                 mOutputText.setText("No results returned.");
             } else {
@@ -912,7 +1138,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
         @Override
         protected void onCancelled() {
-            mProgress.hide();
+            mCheckForUpdatesProgress.hide();
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(

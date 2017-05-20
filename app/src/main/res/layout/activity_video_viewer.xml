@@ -4,34 +4,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/videoViewer_maincontent"
     tools:context="com.polytech.communicationpolytech.VideoViewerActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
 
-        <VideoView
-            android:id="@+id/videoViewer_videoview"
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            />
+            android:layout_height="match_parent"
+            android:layout_gravity="center">
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/videoViewer_playFab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fabSize="normal"
-            app:layout_anchor="@id/videoViewer_videoview"
-            app:useCompatPadding="true"
-            app:layout_anchorGravity="center"
-            app:elevation="2dp"
-            android:src="@drawable/ic_play_arrow_black_24dp"
-            android:layout_gravity="center"
-            />
+            <VideoView
+                android:id="@+id/videoViewer_videoview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                />
 
-    </FrameLayout>
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/videoViewer_playFab"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fabSize="normal"
+                app:layout_anchor="@id/videoViewer_videoview"
+                app:useCompatPadding="true"
+                app:layout_anchorGravity="center"
+                app:elevation="2dp"
+                android:src="@drawable/ic_play_arrow_black_24dp"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                />
+
+        </FrameLayout>
+
+
 
 
 

@@ -22,7 +22,7 @@
 
 
         <ImageView
-            android:id="@+id/card_video"
+            android:id="@+id/card_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="@dimen/thumbHeight"
             android:scaleType="centerCrop"
@@ -33,7 +33,7 @@
 
         <View
             android:id="@+id/card_divider"
-            android:layout_below="@id/card_video"
+            android:layout_below="@id/card_thumbnail"
             android:layout_width="match_parent"
             android:layout_height="0.5dp"
             android:background="@android:color/darker_gray"

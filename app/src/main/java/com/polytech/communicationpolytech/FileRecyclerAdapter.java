@@ -3,17 +3,13 @@ package com.polytech.communicationpolytech;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.pdf.PdfRenderer;
 import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
-import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
@@ -30,6 +26,7 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
+import com.github.barteksc.pdfviewer.PDFView;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -55,14 +52,19 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private FileItem currentItem;
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
+        private PDFView pdfView;
+
+        Context context;
 
         public PdfViewHolder(View itemView) {
             super(itemView);
             this.itemView = itemView;
             title = (TextView) itemView.findViewById(R.id.title);
-            imgThumb = (ImageView) itemView.findViewById(R.id.card_video);
+            imgThumb = (ImageView) itemView.findViewById(R.id.card_thumbnail);
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
             placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
+            //pdfView= (PDFView) itemView.findViewById(R.id.card_pdfView);
+            context=itemView.getContext();
         }
 
 
@@ -79,6 +81,22 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             this.title.setText(title);
 
             imgIcon.setImageResource(iconid);
+
+            //Glide.with(itemView.getContext()).load(iconid).into(imgIcon);
+
+            /*
+            pdfView.fromFile(pdfFile)
+                    .pages(0) // all pages are displayed by default
+                    .enableSwipe(false) // allows to block changing pages using swipe
+                    .swipeHorizontal(false)
+                    .enableDoubletap(false)
+                    .defaultPage(0)
+                    .enableAnnotationRendering(false) // render annotations (such as comments, colors or forms)
+                    .password(null)
+                    .scrollHandle(null)
+                    //.enableAntialiasing(true) // improve rendering a little bit on low-res screens
+                    .load();
+            */
 
 
             imgThumb.post(new Runnable() {
@@ -111,6 +129,9 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
 
+
+
+
         }
 
         public LoadPDFThumbTask getPdfThumbTask() {
@@ -132,14 +153,17 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private ImageView imgThumb,imgIcon;
         private FileItem currentItem;
         private View itemView;
+        Context context;
+
 
         public ImageViewHolder(View itemView) {
             super(itemView);
             this.itemView = itemView;
             title = (TextView) itemView.findViewById(R.id.title);
-            imgThumb = (ImageView) itemView.findViewById(R.id.card_video);
+            imgThumb = (ImageView) itemView.findViewById(R.id.card_thumbnail);
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
             //placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
+            context=itemView.getContext();
         }
 
 
@@ -166,6 +190,8 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             imgIcon.setImageResource(iconid);
 
+            //Glide.with(itemView.getContext()).load(iconid).into(imgIcon);
+
         }
     }
 
@@ -188,6 +214,8 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private TextureVideoView textureVideoView;
         private TextView placeholder;
         private LoadVideoThumbTask videoThumbTask;
+        Context context;
+
 
         public VideoViewHolder(View itemView) {
             super(itemView);
@@ -197,7 +225,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
 
-            imgThumb=(ImageView) itemView.findViewById(R.id.card_thumbnail);
+            imgThumb=(ImageView) itemView.findViewById(R.id.card_video_thumbnail);
 
             placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
 
@@ -295,7 +323,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             String title = currentItem.getTitle();
             View.OnClickListener clickListener = currentItem.getOnClickListener();
             File videoFile=currentItem.getFile();
-            Bitmap thumbBitmap=currentItem.getThumbnailImage();
+            final Bitmap thumbBitmap=currentItem.getThumbnailImage();
 
             /* Ajout du bouton fulllscreen
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -354,26 +382,38 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             imgIcon.setImageResource(iconid);
 
+            //Glide.with(itemView.getContext()).load(iconid).into(imgIcon); //Ne marche pas a cause des ressources vectorielles
+
+
+
             //imgThumb.setImageBitmap(ThumbnailUtils.createVideoThumbnail(videoFile.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND));
 
-            //Si le bitmap est valide
-            if(thumbBitmap!=null){
-                //cacher le placeholder
-                if(placeholder.getVisibility()==View.VISIBLE){
-                    placeholder.setVisibility(View.GONE);
-                }
-                //charger l'image dans l'imageview
-                imgThumb.setImageBitmap(thumbBitmap);
-                Log.d(TAG,"recycled Bitmap");
-            }
-            //Sinon on lance le chargement
-            else{
-                //Chargement de la miniatur
-                videoThumbTask=new LoadVideoThumbTask(itemView.getContext(),this,currentItem.getFile());
-                videoThumbTask.execute();
 
-                Log.d(TAG,"Generating Bitmap");
-            }
+            imgThumb.post(new Runnable() {
+                @Override
+                public void run() {
+                    //Si le bitmap est valide
+                    if(thumbBitmap!=null){
+                        //cacher le placeholder
+                        if(placeholder.getVisibility()==View.VISIBLE){
+                            placeholder.setVisibility(View.GONE);
+                        }
+                        //charger l'image dans l'imageview
+                        imgThumb.setImageBitmap(thumbBitmap);
+                        Log.d(TAG,"recycled Bitmap");
+                    }
+                    //Sinon on lance le chargement
+                    else{
+                        //Chargement de la miniatur
+                        videoThumbTask=new LoadVideoThumbTask(itemView.getContext(),VideoViewHolder.this,currentItem.getFile());
+                        videoThumbTask.execute();
+
+                        Log.d(TAG,"Generating Bitmap");
+                    }
+                }
+            });
+
+
 
             //videoView.setVideoPath(videoFile.getAbsolutePath());
 
@@ -496,7 +536,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             case Constants.TYPE_PDF:
 
-                view = inflater.inflate(R.layout.file_card_item,parent,false);
+                view = inflater.inflate(R.layout.pdf_card_item,parent,false);
                 holder=new PdfViewHolder(view);
 
                 return holder;
@@ -532,11 +572,13 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onViewRecycled(RecyclerView.ViewHolder holder) {
         super.onViewRecycled(holder);
 
+
         if(holder instanceof PdfViewHolder){
             //Set a white background during loading of the new Task
             PdfViewHolder pdfHolder=(PdfViewHolder) holder;
             pdfHolder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(pdfHolder.imgThumb.getContext(),R.color.cardBackground)));
         }
+
 
 
     }
@@ -611,7 +653,11 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static Bitmap getPdfThumbnail(Context context, PdfiumCore pdfiumCore,File pdfFile,ImageView intoView) throws IOException {
 
 
-        double resizefactor=4.0;
+        double resizefactor=8.0;
+
+        int minimum_height=300;
+        int minimum_width=300;
+
         long time_now= System.currentTimeMillis();
 
 
@@ -628,7 +674,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         REQ_HEIGHT=(int)(REQ_HEIGHT/resizefactor);
         REQ_WIDTH=(int)(REQ_WIDTH/resizefactor);
-
 
 
         Bitmap bitmap = Bitmap.createBitmap(REQ_WIDTH,REQ_HEIGHT,
@@ -695,6 +740,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         FileItem currentItem;
         PdfiumCore pdfiumCore;
 
+
         public LoadPDFThumbTask(Context context, PdfViewHolder viewHolder, File pdfFile) {
             this.context = context;
             this.intoView = viewHolder.imgThumb;
@@ -710,6 +756,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             super.onPreExecute();
             placeHolder.setVisibility(View.VISIBLE);
             viewHolder.setIsRecyclable(false);
+
         }
 
         @Override
@@ -725,6 +772,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             try {
                 pdfthumb = getPdfThumbnail(context,pdfiumCore,pdfFile,intoView);
                 //Log.d("LoadPDftask",pdfFile.getName());
+
                 return pdfthumb;
             } catch (IOException e) {
                 e.printStackTrace();

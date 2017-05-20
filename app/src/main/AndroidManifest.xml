@@ -13,6 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@style/AppTheme"
         android:windowSoftInputMode="adjustResize">
         <activity
@@ -29,7 +30,12 @@
         <!-- android:theme="@style/HomeTheme" -->
 
         <activity android:name=".ReseauActivity" />
-        <activity android:name=".ReservedSpaceActivity" />
+
+        <activity
+            android:name=".ReservedSpaceActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            />
+
         <activity
             android:name=".ContactActivity"
             android:windowSoftInputMode="adjustResize" />

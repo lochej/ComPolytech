@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/reserved_callapi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Call drive api" />
+
+    <Button
+        android:id="@+id/reserved_download"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Download Files" />
+
+
+    <Button
+        android:id="@+id/reserved_reset_storage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Effacer toutes les données" />
+
+    <Button
+        android:id="@+id/reserved_export_csv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Exporter formulaire de contact CSV" />
+
+    <Button
+        android:id="@+id/reserved_reset_csv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Réinitialiser les données de contact" />
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/reserved_output_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+    </android.support.v4.widget.NestedScrollView>
+
+
+</LinearLayout>

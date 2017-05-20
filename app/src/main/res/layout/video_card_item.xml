@@ -38,7 +38,7 @@
                 />
 
             <ImageView
-                android:id="@+id/card_thumbnail"
+                android:id="@+id/card_video_thumbnail"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_gravity="center"
@@ -77,7 +77,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:fabSize="normal"
-                app:layout_anchor="@id/card_video"
+                app:layout_anchor="@id/card_video_container"
                 android:layout_gravity="center"
                 app:useCompatPadding="true"
                 app:elevation="2dp"

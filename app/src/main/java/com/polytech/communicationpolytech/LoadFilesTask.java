@@ -93,7 +93,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     }
 
 
-    void fillFileItemListFromFolder(ArrayList<FileItem> fileitems, File rootFolder,boolean isRoot){
+    private void fillFileItemListFromFolder(ArrayList<FileItem> fileitems, File rootFolder,boolean isRoot){
 
         File[] foundFiles=rootFolder.listFiles();
 
@@ -195,38 +195,40 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
 
     int getTypeByFile(File f){
 
-        String fileName=f.getName();
-        int extensionDotIndex=fileName.lastIndexOf('.');
 
-        //Pas d'extensions c'est un dossier
-        if(extensionDotIndex == -1){
-            return Constants.TYPE_FOLDER;
-        }
-        //Le point est à la fin donc il n'y a pas d'extensions ensuite, c'est un dossier
-        if(extensionDotIndex == fileName.length()-1){
+
+        //Si c'est un dossier on retourne tout de suite
+        if(f.isDirectory()){
             return Constants.TYPE_FOLDER;
         }
 
-        //recupération du texte après le point
-        String extension=fileName.substring(extensionDotIndex+1).toUpperCase();
+        if(f.isFile()){
+            //Sinon c'est un fichier, on peut etudier son extension
+            String fileName=f.getName();
+            int extensionDotIndex=fileName.lastIndexOf('.');
 
-        switch (extension){
-            case Constants.EXTENSION_GIF:
-                return Constants.TYPE_IMAGE;
+            //recupération du texte après le point
+            String extension=fileName.substring(extensionDotIndex+1).toUpperCase();
 
-            case Constants.EXTENSION_JPG:
-                return Constants.TYPE_IMAGE;
+            switch (extension){
+                case Constants.EXTENSION_GIF:
+                    return Constants.TYPE_IMAGE;
 
-            case Constants.EXTENSION_PNG:
-                return Constants.TYPE_IMAGE;
+                case Constants.EXTENSION_JPG:
+                    return Constants.TYPE_IMAGE;
 
-            case Constants.EXTENSION_MP4:
-                return Constants.TYPE_VIDEO;
+                case Constants.EXTENSION_PNG:
+                    return Constants.TYPE_IMAGE;
 
-            case Constants.EXTENSION_PDF:
-                return Constants.TYPE_PDF;
+                case Constants.EXTENSION_MP4:
+                    return Constants.TYPE_VIDEO;
 
+                case Constants.EXTENSION_PDF:
+                    return Constants.TYPE_PDF;
+
+            }
         }
+
 
         return Constants.TYPE_UNKNOWN;
     }

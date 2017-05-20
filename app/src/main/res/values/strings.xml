@@ -32,5 +32,7 @@
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_polytech2">Polytech2Activity</string>
+    <string name="check_for_updates_drive">Vérification des mises à jours de fichiers...</string>
+    <string name="downloading_Files">Téléchargement des fichiers</string>
 
 </resources>
