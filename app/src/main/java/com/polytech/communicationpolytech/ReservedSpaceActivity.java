@@ -19,6 +19,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +34,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -84,29 +87,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     CoordinatorLayout mMainCoordinatorLayout;
     AlertDialog.Builder builder;
 
-    DialogInterface.OnClickListener dlpositiveListener=new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-
-            List<String> toDlFiles=getFilesToDownload(true);
-
-            new DLfileTask(mCredential).execute(toDlFiles.get(0), toDlFiles.get(1));//toDlFiles.toArray(new String[]{})[0]);
-
-            dialog.dismiss();
-
-        }
-    };
-
-    View.OnClickListener dlallListener=new View.OnClickListener(){
-        @Override
-        public void onClick(View v) {
-            List<String> toDlFiles=getFilesToDownload(false);
-
-            new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{})[0]);
-
-            //dialog.dismiss();
-        }
-    };
 
 
 
@@ -382,27 +362,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         mDlProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDlProgress.setTitle(getString(R.string.downloading_Files));
         mDlProgress.setMessage("");
-
-        builder=new AlertDialog.Builder(this);
-        builder.setTitle("Mise à jour disponible");
-        builder.setPositiveButton("Télécharger les nouveaux fichiers", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if(Drive_Treemap !=null && Storage_Treemap !=null){
-
-                }
-                List<String> toDlFiles=getFilesToDownload(true);
-
-                new DLfileTask(mCredential).execute(toDlFiles.get(0), toDlFiles.get(1));//toDlFiles.toArray(new String[]{})[0]);
-
-                dialog.dismiss();
-
-            }
-        });
-
-        builder.setNegativeButton("Plus tard",null);
-
-
+        mDlProgress.setCancelable(false);
 
 
         // Initialize credentials and service object.
@@ -943,7 +903,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             super.onPostExecute(aVoid);
             mDlProgress.hide();
             showSnackBar("Téléchargement terminé",Snackbar.LENGTH_LONG);
-            Toast.makeText(ReservedSpaceActivity.this,"FILE DOWNLOADED OK",Toast.LENGTH_SHORT).show();
+            //Toast.makeText(ReservedSpaceActivity.this,"FILE DOWNLOADED OK",Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -956,8 +916,8 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         protected void onCancelled() {
             super.onCancelled();
             mDlProgress.hide();
-            showSnackBar("Tout les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_LONG);
-            Toast.makeText(ReservedSpaceActivity.this,"FILE NOT DOWNLOADED KOOOOO",Toast.LENGTH_SHORT).show();
+            showSnackBar("Tous les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_LONG);
+            //Toast.makeText(ReservedSpaceActivity.this,"FILE NOT DOWNLOADED KOOOOO",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1109,6 +1069,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         protected void onPostExecute(List<String> output) {
             mCheckForUpdatesProgress.hide();
 
+            /*
             List<String> toDlFiles=getFilesToDownload(true);
 
 
@@ -1122,11 +1083,17 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             dialog.setArguments(args);
 
 
+
+
             //builder.setMessage("Il y a " + toDlFiles.size() + " nouveaux fichiers disponibles");
             //dialog.setMessage("Il y a " + toDlFiles.size() + " nouveaux fichiers disponibles");
             //builder.create().show();
 
             dialog.show(getSupportFragmentManager(),"DialogConfirmDownload");
+            */
+
+            askDownloadDialog();
+
 
             if (output == null || output.size() == 0) {
                 mOutputText.setText("No results returned.");
@@ -1156,6 +1123,108 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 mOutputText.setText("Request cancelled.");
             }
         }
+    }
+
+
+    void askDownloadDialog(){
+
+        final List<String> toDlFiles=getFilesToDownload(true);
+
+        builder=new AlertDialog.Builder(this);
+
+
+        LayoutInflater inflater=this.getLayoutInflater();
+
+        View dialogView= inflater.inflate(R.layout.dialog_confirmdownload,null);
+
+        final CheckBox advancedOptions=(CheckBox) dialogView.findViewById(R.id.downloaddialog_advanced);
+
+        final TextView hintView=(TextView) dialogView.findViewById(R.id.downloaddialog_hint);
+
+
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        //Si il n'y a aucun fichier à télécharger
+        if(toDlFiles.size() == 0){
+            //Montrer un dialog avec juste retélécharger tout les fichiers et OK
+            String messageString="Tous les fichiers sont à jours. Il n'y a pas de nouveaux fichiers à télécharger.";
+
+            builder.setTitle("Aucune mise à jour disponible:");
+            builder.setMessage(messageString);
+
+            builder.setPositiveButton("OK", null);
+
+
+        }
+        else{
+            //Montrer un dialog avec télécharger les new fichiers, tout retélecharger et Pas maintenant
+            String messageString="Il y a " + toDlFiles.size() + " nouveaux fichiers disponible au téléchargement." +
+                    "\n"+
+                    "Le téléchargement peut prendre du temps ne quittez par l'application.";
+
+            builder.setTitle("Mise à jour disponible");
+            builder.setMessage(messageString);
+
+            builder.setPositiveButton("Télécharger les nouveaux fichiers", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+
+                    new DLfileTask(mCredential).execute(toDlFiles.get(5), toDlFiles.get(6));//toDlFiles.toArray(new String[]{})[0]);
+
+                    dialog.dismiss();
+
+                }
+            });
+
+            builder.setNegativeButton("Plus tard", null);
+
+        }
+
+
+
+        builder.setNeutralButton("Retélécharger tous les fichiers", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                List<String> toDlFiles=getFilesToDownload(false);
+
+                new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{})[0]);
+
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog= builder.create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final Button neutral=((AlertDialog) dialog).getButton(DialogInterface.BUTTON_NEUTRAL);
+                neutral.setTextColor(ContextCompat.getColor(ReservedSpaceActivity.this,R.color.redLock));
+
+                advancedOptions.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(isChecked){
+                            neutral.setVisibility(View.VISIBLE);
+                            hintView.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            neutral.setVisibility(View.GONE);
+                            hintView.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
+                neutral.setVisibility(advancedOptions.isChecked() ? View.VISIBLE:View.GONE);
+                hintView.setVisibility(advancedOptions.isChecked() ? View.VISIBLE:View.GONE);
+            }
+        });
+
+        dialog.show();
+
     }
 
 }

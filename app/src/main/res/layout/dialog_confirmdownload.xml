@@ -12,10 +12,12 @@
         style="@style/AlertDialog.AppCompat.Light"
         android:text="Options supplémentaires" />
 
-    <Button
-        android:id="@+id/downloaddialog_downloadall"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/downloaddialog_hint"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/Widget.AppCompat.Button.Borderless.Colored"
-        android:text="Retélécharger tout les fichiers" />
+        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:textColor="@color/redLock"
+        android:text="Retélécharger tous les fichiers peut prendre beaucoup de temps. \n Ne quittez pas l'application."/>
 </LinearLayout>

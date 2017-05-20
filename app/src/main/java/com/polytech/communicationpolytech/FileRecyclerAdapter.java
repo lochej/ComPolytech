@@ -26,7 +26,6 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
-import com.github.barteksc.pdfviewer.PDFView;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -52,7 +51,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private FileItem currentItem;
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
-        private PDFView pdfView;
 
         Context context;
 
@@ -63,7 +61,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             imgThumb = (ImageView) itemView.findViewById(R.id.card_thumbnail);
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
             placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
-            //pdfView= (PDFView) itemView.findViewById(R.id.card_pdfView);
             context=itemView.getContext();
         }
 
