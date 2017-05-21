@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
@@ -86,10 +87,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     AlertDialog mDownloadStartDialog;
     CoordinatorLayout mMainCoordinatorLayout;
     AlertDialog.Builder builder;
-
-
-
-
+    
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
@@ -102,6 +100,8 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     private static final String APP_NAME="Communication Polytech App";
 
     private static java.io.File sdRootFolder;
+
+    private java.io.File reservedFolder;
 
     private List<File> files_list;
 
@@ -164,7 +164,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
         return toDownloadFiles;
     }
-
 
     /**
      * Doit etre appelee apres avoir cree Drive_Treemap et Storage_Treemap
@@ -326,6 +325,10 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         setContentView(R.layout.activity_reserved_space);
         setTitle(R.string.reserved_space);
 
+        sdRootFolder=getExternalFilesDir(null);
+
+        reservedFolder=new java.io.File(sdRootFolder.getAbsolutePath() + Constants.PATH_RESERVED);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -347,8 +350,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
         mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.reserved_activity_container);
 
-
-        sdRootFolder=getExternalFilesDir(null);
 
 
         //Mise en place du dialog de checking Google Drive
@@ -515,7 +516,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 return ConfigFragment.newInstance(position + 1,ReservedSpaceActivity.this);
             }
 
-            return RecyclerViewFileFragment.newInstance(position+1,getExternalFilesDir(null));
+            return RecyclerViewFileFragment.newInstance(position+1,reservedFolder);
         }
 
         @Override
@@ -591,14 +592,21 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             View rootView = inflater.inflate(R.layout.fragment_reserved_config, container, false);
 
             mOutputText=(TextView) rootView.findViewById(R.id.reserved_output_textview);
-            mCallApiButton=(Button) rootView.findViewById(R.id.reserved_callapi);
-            mDlApiButton=(Button) rootView.findViewById(R.id.reserved_download);
+            //mCallApiButton=(Button) rootView.findViewById(R.id.reserved_callapi);
+            //mDlApiButton=(Button) rootView.findViewById(R.id.reserved_download);
             mClearStorageButton=(Button) rootView.findViewById(R.id.reserved_reset_storage);
             mShareCSVButton = (Button) rootView.findViewById(R.id.reserved_export_csv);
             mClearCSVButton = (Button) rootView.findViewById(R.id.reserved_reset_csv);
 
+            mShareCSVButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    parentActivity.onClickExportCsv(v);
+                }
+            });
 
 
+            /*
             mCallApiButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -637,10 +645,11 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                     }
                 }
             });
+            */
 
             parentActivity.mOutputText=mOutputText;
-            parentActivity.mDlApiButton=mDlApiButton;
-            parentActivity.mCallApiButton=mCallApiButton;
+            //parentActivity.mDlApiButton=mDlApiButton;
+            //parentActivity.mCallApiButton=mCallApiButton;
 
             return rootView;
         }
@@ -920,8 +929,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             //Toast.makeText(ReservedSpaceActivity.this,"FILE NOT DOWNLOADED KOOOOO",Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
 
     public class DownloadProgressListener implements MediaHttpDownloaderProgressListener {
@@ -1224,6 +1231,27 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         });
 
         dialog.show();
+
+    }
+
+    void onClickExportCsv(View v){
+
+        java.io.File csvFile=new java.io.File(sdRootFolder.getAbsolutePath() + "/formulaire.csv");
+
+        //Le fichier csv existe
+        if(csvFile.exists()){
+
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+
+            sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + csvFile.getAbsolutePath()));
+            sendIntent.setType("text/csv");
+
+            startActivity(Intent.createChooser(sendIntent ,"Partager via:"));
+        }else{
+            showSnackBar("Aucun formulaire à exporter.", Snackbar.LENGTH_LONG);
+        }
+
 
     }
 

@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
+    <!--
     <Button
         android:id="@+id/reserved_callapi"
         android:layout_width="match_parent"
@@ -15,24 +17,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Download Files" />
-
+       -->
 
     <Button
         android:id="@+id/reserved_reset_storage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_delete_forever_black_24dp"
         android:text="Effacer toutes les données" />
 
     <Button
         android:id="@+id/reserved_export_csv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_share_black_24dp"
         android:text="Exporter formulaire de contact CSV" />
 
     <Button
         android:id="@+id/reserved_reset_csv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:drawableStart="@drawable/ic_delete_black_24dp"
         android:text="Réinitialiser les données de contact" />
 
     <android.support.v4.widget.NestedScrollView

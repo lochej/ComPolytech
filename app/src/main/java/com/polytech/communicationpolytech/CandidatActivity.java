@@ -19,6 +19,8 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import java.io.File;
+
 public class CandidatActivity extends AppCompatActivity {
 
     /**
@@ -36,10 +38,18 @@ public class CandidatActivity extends AppCompatActivity {
      */
     private ViewPager mViewPager;
 
+    File[] sectionFolders;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_candidat);
+
+        File sdFolder=getExternalFilesDir(null);
+
+        File candidatFolder=new File(sdFolder.getAbsolutePath() + Constants.PATH_CANDIDAT);
+
+        sectionFolders=candidatFolder.listFiles();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -100,29 +110,51 @@ public class CandidatActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a ConfigFragment (defined as a static inner class below).
-            return RecyclerViewFileFragment.newInstance(position + 1,getExternalFilesDir(null));
+            File dirToLoad=null;
+
+            if(sectionFolders != null){
+                dirToLoad=sectionFolders[position];
+            }
+
+            return RecyclerViewFileFragment.newInstance(position + 1,dirToLoad);
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            //On retourne 1 pour avoir une page vide recyclerViewFragment
+            if(sectionFolders == null){
+                return 1;
+            }
+
+            return sectionFolders.length;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
+
+            File dirToLoad=null;
+
+            if(sectionFolders != null){
+                dirToLoad=sectionFolders[position];
+            }
+
+            return dirToLoad==null ? "": dirToLoad.getName();
+
+            /*
             switch (position) {
                 case 0:
-                    return "BAC+1";
+                    return "L'école";
                 case 1:
-                    return "BAC+2";
+                    return "Les formations";
                 case 2:
-                    return "BAC+3";
+                    return "Projets étudiants";
                 case 3:
-                    return "BAC+4";
+                    return "Vie étudiante";
 
             }
             return null;
+            */
         }
     }
 }

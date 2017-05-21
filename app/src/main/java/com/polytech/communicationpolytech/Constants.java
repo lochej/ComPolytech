@@ -24,4 +24,9 @@ interface Constants {
     String EXTRA_VIDEO_PATH="lien_vers_video";
     String EXTRA_VIDEO_MILLIS="state_video";
     String EXTRA_IMAGE_PATH="path_image";
+
+    String PATH_POLYTECH="/Application Communication/Polytech Tours";
+    String PATH_CANDIDAT="/Application Communication/Espace Candidat";
+    String PATH_RESERVED="/Application Communication/Espace Réservé";
+    String PATH_RESEAU="/Application Communication/Réseau Polytech";
 }

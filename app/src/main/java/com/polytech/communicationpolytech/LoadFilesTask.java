@@ -12,6 +12,9 @@ import android.view.View;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -23,6 +26,42 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     Context context;
     ProgressDialog progressDialog;
     RecyclerView recyclerView;
+
+    //Descend les dossier dans la liste et les trie par ordre alphabétique
+    public static Comparator<File> pullDownFoldersAlpha= new Comparator<File>() {
+        @Override
+        public int compare(File o1, File o2) {
+
+            // 0 si o1==o2 , 1 si o1 > o2 , -1 si o1<o2
+
+            //si o1 est un dossier il va descendre dans la liste il vient apres o2
+            if(o1.isDirectory()){
+                return 1;
+            }
+
+            //si o2 est un dossier il vient apres o1 dans la liste
+            if(o2.isDirectory()){
+                return -1;
+            }
+
+            int type1=getTypeByFile(o1);
+
+            int type2=getTypeByFile(o2);
+
+            //Si le 1 est une video on la remonte donc il vient avant o2
+            if(type1==Constants.TYPE_VIDEO){
+                return -1;
+            }
+
+            //Si le 2 est une vidéo on la remonte donc il vient avant o1
+            if(type2==Constants.TYPE_VIDEO){
+                return 1;
+            }
+
+
+            return o1.getName().compareTo(o2.getName());
+        }
+    };
 
     public LoadFilesTask(Context context,RecyclerView toFillRecyclerView,@Nullable ProgressDialog progressDialog) {
         this.context=context;
@@ -96,6 +135,12 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     private void fillFileItemListFromFolder(ArrayList<FileItem> fileitems, File rootFolder,boolean isRoot){
 
         File[] foundFiles=rootFolder.listFiles();
+
+        if(foundFiles==null){
+            return;
+        }
+
+        Arrays.sort(foundFiles,pullDownFoldersAlpha);
 
         //Ajouter un séparateur
         if(!isRoot && (foundFiles.length > 0)){
@@ -193,7 +238,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     }
 
 
-    int getTypeByFile(File f){
+    public static int getTypeByFile(File f){
 
 
 

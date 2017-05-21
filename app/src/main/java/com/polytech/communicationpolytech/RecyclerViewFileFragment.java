@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.io.File;
 
@@ -18,6 +20,7 @@ public class RecyclerViewFileFragment extends Fragment {
 
     AsyncTask loadTask;
     RecyclerView recyclerView;
+    TextView placeholder;
     File rootFile;
 
 
@@ -59,7 +62,17 @@ public class RecyclerViewFileFragment extends Fragment {
 
         recyclerView=(RecyclerView) rootView.findViewById(R.id.frag_recyclerview);
 
-        loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(rootFile);
+        placeholder=(TextView) rootView.findViewById(R.id.frag_placeholder);
+
+        //Le fichier servant à remplir la recyclerview n'existe pas où est invalide donc on ne peut pas remplir la vue
+        if(rootFile==null || !rootFile.exists()){
+            placeholder.setVisibility(View.VISIBLE);
+        }
+        else {
+            loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(rootFile);
+        }
+
+
 
         return rootView;
     }

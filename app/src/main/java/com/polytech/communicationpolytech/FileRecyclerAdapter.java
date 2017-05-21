@@ -484,7 +484,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    public static Comparator<FileItem> fileItemComparator=new Comparator<FileItem>() {
+    public static Comparator<FileItem> pullUpVideoTypes =new Comparator<FileItem>() {
         @Override
         public int compare(FileItem o1, FileItem o2) {
 
@@ -506,12 +506,31 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     };
 
+    //Descend les dossier dans la liste et les trie par ordre alphabétique
+    public static Comparator<File> pullDownFoldersAlpha= new Comparator<File>() {
+        @Override
+        public int compare(File o1, File o2) {
+
+            if(o1.isDirectory() && o2.isDirectory()){
+                return o1.getName().compareTo(o2.getName());
+            }
+
+            //On descend les dossiers
+            if(o1.isDirectory() || o2.isDirectory()){
+                return 1;
+            }
+
+
+            return o1.getName().compareTo(o2.getName());
+        }
+    };
+
     private List<FileItem> objectList;
     private LayoutInflater inflater;
 
     public FileRecyclerAdapter(Context context, List<FileItem> objectList) {
         this.objectList=objectList;
-        Collections.sort(objectList,fileItemComparator);
+        //Collections.sort(objectList, pullUpVideoTypes);
         inflater=LayoutInflater.from(context);
 
     }
@@ -574,6 +593,12 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             //Set a white background during loading of the new Task
             PdfViewHolder pdfHolder=(PdfViewHolder) holder;
             pdfHolder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(pdfHolder.imgThumb.getContext(),R.color.cardBackground)));
+        }
+
+        if(holder instanceof VideoViewHolder){
+            //Set a white background during loading of the new Task
+            VideoViewHolder Holder=(VideoViewHolder) holder;
+            Holder.imgThumb.setImageDrawable(new ColorDrawable(ContextCompat.getColor(Holder.imgThumb.getContext(),android.R.color.black)));
         }
 
 

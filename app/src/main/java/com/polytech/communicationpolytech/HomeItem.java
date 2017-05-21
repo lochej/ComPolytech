@@ -94,7 +94,7 @@ public class HomeItem {
 
         HomeItem reseau=new HomeItem();
         reseau.setCardID(1);
-        reseau.setThumbID(R.drawable.reseau_polytech);
+        reseau.setThumbID(R.drawable.reseau_polytech3);
         reseau.setTitle(mainActivity.getString(R.string.reseau_polytech));
         reseau.setIconID(R.drawable.ic_smallpolytech);
         reseau.setOnClickListener(new View.OnClickListener() {

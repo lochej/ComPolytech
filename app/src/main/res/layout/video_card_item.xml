@@ -33,8 +33,10 @@
                 android:layout_height="300dp"
                 android:text="@string/loading"
                 android:gravity="center"
+                android:paddingTop="120dp"
                 android:textStyle="bold|italic"
-                android:visibility="gone"
+                android:textColor="@android:color/white"
+                android:visibility="visible"
                 />
 
             <ImageView

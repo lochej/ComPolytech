@@ -18,6 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
+
 public class Polytech2Activity extends AppCompatActivity {
 
 
@@ -27,11 +29,18 @@ public class Polytech2Activity extends AppCompatActivity {
 
     private ViewPager mViewPager;
 
+    File[] sectionFolders;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_polytech2);
 
+        File sdFolder=getExternalFilesDir(null);
+
+        File polytechFolder=new File(sdFolder.getAbsolutePath() + Constants.PATH_POLYTECH);
+
+        sectionFolders=polytechFolder.listFiles();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -57,6 +66,7 @@ public class Polytech2Activity extends AppCompatActivity {
         progressDialog.setIndeterminate(true);
         progressDialog.setCancelable(false);
         progressDialog.setMessage(getString(R.string.loading));
+
 
 
     }
@@ -98,17 +108,38 @@ public class Polytech2Activity extends AppCompatActivity {
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a ConfigFragment (defined as a static inner class below).
-            return RecyclerViewFileFragment.newInstance(position + 1,getExternalFilesDir(null));
+            File dirToLoad=null;
+
+            if(sectionFolders != null){
+                dirToLoad=sectionFolders[position];
+            }
+
+            return RecyclerViewFileFragment.newInstance(position + 1,dirToLoad);
         }
 
         @Override
         public int getCount() {
             // Show 3 total pages.
-            return 4;
+            //On retourne 1 pour avoir une page vide recyclerViewFragment
+            if(sectionFolders == null){
+                return 1;
+            }
+
+            return sectionFolders.length;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
+
+            File dirToLoad=null;
+
+            if(sectionFolders != null){
+                dirToLoad=sectionFolders[position];
+            }
+
+            return dirToLoad==null ? "": dirToLoad.getName();
+
+            /*
             switch (position) {
                 case 0:
                     return "L'école";
@@ -121,6 +152,7 @@ public class Polytech2Activity extends AppCompatActivity {
 
             }
             return null;
+            */
         }
     }
 }
