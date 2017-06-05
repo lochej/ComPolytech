@@ -14,6 +14,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.api.client.util.StringUtils;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,6 +35,7 @@ public class ContactActivity extends AppCompatActivity {
     Spinner newsletter;
     Drawable mailbg;
     CoordinatorLayout content;
+    File csvFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,10 @@ public class ContactActivity extends AppCompatActivity {
         if(getSupportActionBar()!=null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        File externalDir=getExternalFilesDir(null);
+
+        csvFile=new File(externalDir.getAbsolutePath() + "/formulaire.csv");
 
         nom=(EditText) findViewById(R.id.contact_nameEditText);
         prenom=(EditText) findViewById(R.id.contact_firstNameEditText);
@@ -75,13 +82,11 @@ public class ContactActivity extends AppCompatActivity {
 
     public void OnConfirmForm(View v){
 
-        String[] data=new String[5];
         String nom=this.nom.getText().toString();
         String prenom=this.prenom.getText().toString();
         String mail=this.mail.getText().toString();
         String study=((TextView)this.study.getSelectedView()).getText().toString();
         String newsletter=((TextView)this.newsletter.getSelectedView()).getText().toString();
-
 
 
         if(isValidEmailAddress(mail)){
@@ -91,14 +96,10 @@ public class ContactActivity extends AppCompatActivity {
 
 
             CSVformatter.CSVEntry entry=new CSVformatter.CSVEntry(nom,prenom,newsletter,study,mail);
-            data[0]=prenom;
-            data[1]=nom;
-            data[2]=mail;
-            data[3]=study;
-            data[4]=newsletter;
+
 
             try {
-                saveCSVFile(null,false,entry);
+                saveCSVFile(csvFile,false,entry);
                 Toast.makeText(v.getContext(),"Votre demande de renseignements a été prise en compte",Toast.LENGTH_LONG).show();
                 finish();
 
@@ -131,15 +132,24 @@ public class ContactActivity extends AppCompatActivity {
     }
 
     public static boolean isValidEmailAddress(String email) {
-        return email.matches("(.*)@(.*)");
+        return email.matches("(.*)@(.*)") && getCharCount(email,'@')==1 ;
     }
 
+    public static int getCharCount(String s,char character){
+        int count=0;
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i) == character){
+                count++;
+            }
+        }
+        return count;
+    }
 
     public void saveCSVFile(File intoFile,boolean append,String[] line) throws IOException {
 
         File externalDir=getExternalFilesDir(null);
 
-        File csvFile=new File(externalDir.getAbsolutePath() + "/formulaire.csv");
+        File csvFile=new File(externalDir.getAbsolutePath(),Constants.CSV_FILENAME);
 
         int format=CSVformatter.FORMAT_CUSTOM;
 
@@ -161,11 +171,10 @@ public class ContactActivity extends AppCompatActivity {
 
     }
 
-    public void saveCSVFile(File intoFile, boolean append, CSVformatter.CSVEntry entry) throws IOException {
+    public void saveCSVFile(File csvFile, boolean append, CSVformatter.CSVEntry entry) throws IOException {
 
-        File externalDir=getExternalFilesDir(null);
 
-        File csvFile=new File(externalDir.getAbsolutePath() + "/formulaire.csv");
+
 
         int format=CSVformatter.FORMAT_CUSTOM;
 

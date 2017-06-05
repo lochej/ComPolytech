@@ -31,6 +31,15 @@
             android:layout_alignParentStart="true"
             />
 
+        <!--
+        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+            android:id="@+id/card_pdfThumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+        -->
 
         <!--
         <com.github.barteksc.pdfviewer.PDFView

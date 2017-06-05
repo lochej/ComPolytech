@@ -6,6 +6,9 @@
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="cardElevation">3dp</dimen>
     <dimen name="cardCornerRadius">3dp</dimen>
-    <dimen name="cardMargin">4dp</dimen>
+    <dimen name="cardMargin">3dp</dimen>
     <dimen name="thumbHeight">200dp</dimen>
+    <dimen name="windowsMargins">16dp</dimen>
+    <dimen name="spinnerMargin">16dp</dimen>
+
 </resources>

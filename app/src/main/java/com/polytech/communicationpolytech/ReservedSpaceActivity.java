@@ -318,6 +318,31 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
     }
 
+    /**
+     *
+     */
+    private void readCSVEntries(){
+
+    }
+
+    /**
+     *
+     */
+    private void deleteCSVData(){
+        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
+
+        if(csvFile.exists()){
+            if(csvFile.delete()){
+                showColoredSnackBar(R.color.greenLock,"Données de contact effacées.",Snackbar.LENGTH_LONG);
+            }else{
+                showColoredSnackBar(R.color.redLock,"Échec de l'effacement des données de contact.",Snackbar.LENGTH_LONG);
+            }
+        }
+        else{
+            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
+        }
+    }
+
     //########################## APP LIFECYCLE ##########################
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -376,6 +401,12 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
     private void showSnackBar(String message,int length){
         Snackbar.make(mMainCoordinatorLayout,message,length).show();
+    }
+
+    private void showColoredSnackBar(int colorID,String message, int length){
+        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
+        snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
+        snack.show();
     }
 
     private void showSnackBar(int stringid, int length){
@@ -614,6 +645,13 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 @Override
                 public void onClick(View v) {
                     parentActivity.onClickExportCsv(v);
+                }
+            });
+
+            mClearCSVButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    parentActivity.deleteCSVData();
                 }
             });
 

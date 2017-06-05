@@ -1,9 +1,15 @@
 package com.polytech.communicationpolytech;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
@@ -12,6 +18,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.polytech.communicationpolytech.LoadFilesTask.fillFileItemListFromFolder;
 import static com.polytech.communicationpolytech.LoadFilesTask.setAdapter;
@@ -22,10 +29,51 @@ import static com.polytech.communicationpolytech.LoadFilesTask.setAdapter;
 
 public class RecyclerViewFileFragment extends Fragment {
 
+    public static final int START_LOADING=0;
+    public static final int LOADING=1;
+    public static final int SUCCESS_LOADING=2;
+    public static final int FILE_NOT_FOUND=3;
+    public static final String KEY_FILEITEMS="sav_fitem";
+
     AsyncTask loadTask;
     RecyclerView recyclerView;
     TextView placeholder;
     File rootFile;
+    SwipeRefreshLayout refreshLayout;
+    Thread loaderThread;
+    ArrayList<FileItem> data;
+
+    Handler fileLoadedHandler=new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+
+            switch (msg.what){
+
+                case START_LOADING:
+
+                    refreshLayout.setRefreshing(true);
+
+                    break;
+                case LOADING:
+                    break;
+                case SUCCESS_LOADING:
+                    data=(ArrayList<FileItem>)msg.obj;
+                    installDataToRecyclerView();
+                    refreshLayout.setRefreshing(false);
+
+                    break;
+                case FILE_NOT_FOUND:
+
+                    placeholder.setVisibility(View.VISIBLE);
+                    refreshLayout.setRefreshing(false);
+
+                    break;
+            }
+
+
+            return false;
+        }
+    });
 
 
     /**
@@ -54,6 +102,17 @@ public class RecyclerViewFileFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if(savedInstanceState!=null){
+            data=savedInstanceState.getParcelableArrayList(KEY_FILEITEMS);
+            Log.d("RECYCLERFRAG","Reinstall saved file items");
+        }
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -62,12 +121,13 @@ public class RecyclerViewFileFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_recyclerview, container, false);
 
-
+        refreshLayout=(SwipeRefreshLayout) rootView.findViewById(R.id.frag_swiperefresh);
 
         recyclerView=(RecyclerView) rootView.findViewById(R.id.frag_recyclerview);
 
         placeholder=(TextView) rootView.findViewById(R.id.frag_placeholder);
 
+        /*
         //Le fichier servant à remplir la recyclerview n'existe pas où est invalide donc on ne peut pas remplir la vue
         if(rootFile==null || !rootFile.exists()){
             placeholder.setVisibility(View.VISIBLE);
@@ -84,13 +144,39 @@ public class RecyclerViewFileFragment extends Fragment {
 
             //loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(rootFile);
         }
+        */
 
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                //refreshLayout.setRefreshing(false);
+                loadFiles(true);
+            }
+        });
+
+
+
+        loadFiles(false);
 
 
         return rootView;
     }
 
 
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArrayList(KEY_FILEITEMS,data);
+        Log.d("RECYCLERFRAG","Saved file items");
+
+    }
 
     @Override
     public void onStop() {
@@ -135,6 +221,83 @@ public class RecyclerViewFileFragment extends Fragment {
                 if(videoHolder.getVideoThumbTask() != null && videoHolder.getVideoThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
                     videoHolder.getVideoThumbTask().cancel(true);
                 }
+            }
+
+        }
+    }
+
+    private void  loadFiles(boolean forceReload){
+
+        if(data !=null && !forceReload){
+            setAdapter(recyclerView,data);
+            return;
+        }
+
+        if(loaderThread == null || !loaderThread.isAlive()){
+            loaderThread=new LoadThread(fileLoadedHandler,rootFile);
+
+        }
+        //Si le thread est en vie je retourne car il fonctionne deja
+        if(loaderThread.isAlive()){
+            return;
+        }
+        //Si le thread n'a pas encore été lancé alors je le lance
+        if(loaderThread.getState() == Thread.State.NEW){
+            loaderThread.start();
+        }
+
+    }
+
+    private void installDataToRecyclerView(){
+        if(data!=null){
+            setAdapter(recyclerView,data);
+        }
+    }
+
+    private class LoadThread extends Thread{
+
+        Handler mHandler;
+        File rootFile;
+
+
+        public LoadThread(Handler mHandler, File rootFile) {
+            this.mHandler=mHandler;
+            this.rootFile=rootFile;
+        }
+
+
+        @Override
+        public void interrupt() {
+            super.interrupt();
+        }
+
+        @Override
+        public void run() {
+
+            mHandler.obtainMessage(START_LOADING).sendToTarget();
+
+            //Le fichier servant à remplir la recyclerview n'existe pas où est invalide donc on ne peut pas remplir la vue
+            if(rootFile==null || !rootFile.exists()){
+
+                mHandler.obtainMessage(FILE_NOT_FOUND).sendToTarget();
+                //faire:
+                // placeholder.setVisibility(View.VISIBLE);
+                //setRefreshing(false);
+            }
+            else {
+
+                File externalDir=rootFile;
+
+                ArrayList<FileItem> fileitems=new ArrayList<>();
+
+                fillFileItemListFromFolder(fileitems,externalDir,true);
+
+                mHandler.obtainMessage(SUCCESS_LOADING,fileitems).sendToTarget();
+
+
+                //setAdapter(recyclerView,fileitems);
+
+                //loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(rootFile);
             }
 
         }

@@ -10,7 +10,18 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        /* //LAMBDA EXPRESSIONS SUPPORT
+        jackOptions {
+            enabled true
+        }
+        */
     }
+    /* //LAMBDA EXPRESSIONS SUPPORT
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    */
     buildTypes {
         release {
             minifyEnabled false
@@ -19,6 +30,7 @@ android {
     }
     productFlavors {
     }
+
 }
 
 dependencies {
@@ -38,6 +50,10 @@ dependencies {
     compile 'com.github.barteksc:pdfium-android:1.6.0'
     compile 'com.google.android.gms:play-services-auth:10.2.4'
     compile 'pub.devrel:easypermissions:0.2.1'
+
+    compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.6.0'
+    compile 'de.number42:subsampling-pdf-decoder:0.1.0@aar'
+
     compile('com.google.api-client:google-api-client-android:1.22.0') {
         exclude group: 'org.apache.httpcomponents'
     }

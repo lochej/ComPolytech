@@ -28,6 +28,11 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
+import com.davemorrissey.labs.subscaleview.decoder.DecoderFactory;
+import com.davemorrissey.labs.subscaleview.decoder.ImageDecoder;
+import com.davemorrissey.labs.subscaleview.decoder.ImageRegionDecoder;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -36,6 +41,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import de.number42.subsampling_pdf_decoder.PDFDecoder;
+import de.number42.subsampling_pdf_decoder.PDFRegionDecoder;
+
+import static com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP;
 
 
 /**
@@ -49,8 +59,58 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private static int WHAT_CANCEL=-3;
     private static int WHAT_LOADING=-4;
 
+    public static View.OnClickListener getClickListener(final File fileToOpen, int type){
 
 
+        switch (type){
+            case Constants.TYPE_IMAGE:
+                return new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent viewer=new Intent(v.getContext(),ImageViewerActivity.class);
+                        viewer.putExtra(Constants.EXTRA_IMAGE_PATH,fileToOpen);
+
+                        v.getContext().startActivity(viewer);
+                    }
+                };
+
+            case Constants.TYPE_PDF:
+                return new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+
+                        intent.setDataAndType(
+                                Uri.parse("file://" + fileToOpen.getAbsolutePath()),
+                                "application/pdf");
+
+                        v.getContext().startActivity(intent);
+                    }
+                };
+
+            case Constants.TYPE_VIDEO:
+                return new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //videoView.pause();
+                        //mediaPlayer.pause();
+                        //textureVideoView.pause();
+                        Intent videoPlayer=new Intent(v.getContext(),VideoViewerActivity.class);
+                        //videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,textureVideoView.getCurrentPosition());
+                        videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,0);
+                        videoPlayer.putExtra(Constants.EXTRA_VIDEO_PATH,fileToOpen);
+
+                        //On eteint la video dans la card et on la lance dans l'activité donc on reset le playButton
+                        //playFab.setVisibility(View.VISIBLE);
+
+                        v.getContext().startActivity(videoPlayer);
+                    }
+                };
+
+                default:
+                    return null;
+        }
+    }
 
     public class PdfViewHolder extends RecyclerView.ViewHolder{
 
@@ -63,6 +123,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
         private GenerateBitmapThread generateBitmapThread;
+        private SubsamplingScaleImageView pdfThumb;
 
         Context context;
 
@@ -115,20 +176,20 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             imgThumb = (ImageView) itemView.findViewById(R.id.card_thumbnail);
             imgIcon = (ImageView) itemView.findViewById(R.id.card_icon);
             placeholder = (TextView) itemView.findViewById(R.id.card_placeholder);
+            //pdfThumb = (SubsamplingScaleImageView)itemView.findViewById(R.id.card_pdfThumbnail);
             context=itemView.getContext();
         }
-
 
         public void setData(final FileItem currentItem, int position) {
 
             this.currentItem=currentItem;
             int iconid = currentItem.getIconID();
             String title = currentItem.getTitle();
-            View.OnClickListener clickListener = currentItem.getOnClickListener();
+            //View.OnClickListener clickListener = currentItem.getOnClickListener();
             final Bitmap thumbBitmap=currentItem.getThumbnailImage();
-            File pdfFile=currentItem.getFile();
+            final File pdfFile=currentItem.getFile();
 
-            itemView.setOnClickListener(clickListener);
+            itemView.setOnClickListener(getClickListener(pdfFile,currentItem.getType()));
             this.title.setText(title);
 
             imgIcon.setImageResource(iconid);
@@ -147,6 +208,26 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     .scrollHandle(null)
                     //.enableAntialiasing(true) // improve rendering a little bit on low-res screens
                     .load();
+            */
+            /*
+            int minimumTileDpi = 120;
+            float scale=1;
+            pdfThumb.setMinimumTileDpi(minimumTileDpi);
+            pdfThumb.setMinimumScaleType(SCALE_TYPE_CENTER_CROP);
+            pdfThumb.setPanEnabled(false);
+            pdfThumb.setZoomEnabled(false);
+            pdfThumb.setOnClickListener(clickListener);
+            //pdfThumb.setClickable(false);
+
+            //sets the PDFDecoder for the imageView
+            pdfThumb.setBitmapDecoderFactory(() -> new PDFDecoder(0, pdfFile, scale));
+
+            //sets the PDFRegionDecoder for the imageView
+            pdfThumb.setRegionDecoderFactory(() -> new PDFRegionDecoder(0, pdfFile, scale));
+
+            ImageSource source = ImageSource.uri(pdfFile.getAbsolutePath());
+
+            pdfThumb.setImage(source);
             */
 
 
@@ -173,15 +254,17 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         pdfThumbTask=new LoadPDFThumbTask(itemView.getContext(),PdfViewHolder.this,currentItem.getFile());
                         pdfThumbTask.execute();
 
-                        /*
-                        generateBitmapThread=new GenerateBitmapThread(handler,context,Constants.TYPE_PDF,currentItem.getFile());
-                        generateBitmapThread.start();
-                        */
+
+                        //generateBitmapThread=new GenerateBitmapThread(handler,context,Constants.TYPE_PDF,currentItem.getFile());
+                        //generateBitmapThread.start();
+
                         Log.d(TAG,"Generating Bitmap");
 
                     }
                 }
             });
+
+
 
 
 
@@ -228,20 +311,12 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             this.currentItem=currentItem;
             int iconid = currentItem.getIconID();
             String title = currentItem.getTitle();
-            View.OnClickListener clickListener = currentItem.getOnClickListener();
+            //View.OnClickListener clickListener = currentItem.getOnClickListener();
             final File imageFile=currentItem.getFile();
 
             Glide.with(itemView.getContext()).fromFile().asBitmap().load(imageFile).into(imgThumb);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent viewer=new Intent(v.getContext(),ImageViewerActivity.class);
-                    viewer.putExtra(Constants.EXTRA_IMAGE_PATH,imageFile);
-
-                    v.getContext().startActivity(viewer);
-                }
-            });
+            itemView.setOnClickListener(getClickListener(imageFile,currentItem.getType()));
             this.title.setText(title);
 
             imgIcon.setImageResource(iconid);
@@ -423,7 +498,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             this.currentItem=currentItem;
             int iconid = currentItem.getIconID();
             String title = currentItem.getTitle();
-            View.OnClickListener clickListener = currentItem.getOnClickListener();
+            //View.OnClickListener clickListener = currentItem.getOnClickListener();
             File videoFile=currentItem.getFile();
             final Bitmap thumbBitmap=currentItem.getThumbnailImage();
 
@@ -461,23 +536,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             });
             */
 
-            playFab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //videoView.pause();
-                    //mediaPlayer.pause();
-                    //textureVideoView.pause();
-                    Intent videoPlayer=new Intent(v.getContext(),VideoViewerActivity.class);
-                    //videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,textureVideoView.getCurrentPosition());
-                    videoPlayer.putExtra(Constants.EXTRA_VIDEO_MILLIS,0);
-                    videoPlayer.putExtra(Constants.EXTRA_VIDEO_PATH,currentItem.getFile());
-
-                    //On eteint la video dans la card et on la lance dans l'activité donc on reset le playButton
-                    //playFab.setVisibility(View.VISIBLE);
-
-                    v.getContext().startActivity(videoPlayer);
-                }
-            });
+            playFab.setOnClickListener(getClickListener(videoFile,currentItem.getType()));
 
 
             this.title.setText(title);
@@ -647,6 +706,15 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView);
+    }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -787,7 +855,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public static Bitmap getPdfThumbnail(Context context, PdfiumCore pdfiumCore,File pdfFile,ImageView intoView) throws IOException {
 
 
-        double resizefactor=8.0;
+        double resizefactor=6.0;
 
         int minimum_height=300;
         int minimum_width=300;

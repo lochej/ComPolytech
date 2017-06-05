@@ -47,6 +47,10 @@ public class CandidatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_candidat);
 
+        setup();
+    }
+
+    private void setup(){
         File sdFolder=getExternalFilesDir(null);
 
         File candidatFolder=new File(sdFolder.getAbsolutePath() + Constants.PATH_CANDIDAT);
@@ -89,10 +93,7 @@ public class CandidatActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-
-
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

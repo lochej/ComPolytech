@@ -154,7 +154,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                             fileToAdd.getName(),
                             R.drawable.ic_image_black_24dp,
                             fileToAdd);
-
+                    /*
                     itemtoAdd.setListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -165,6 +165,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                             v.getContext().startActivity(startImageViewer);
                         }
                     });
+                    */
 
                     itemtoAdd.setType(Constants.TYPE_IMAGE);
 
@@ -179,6 +180,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                             R.drawable.ic_picture_as_pdf_black_24dp,
                             fileToAdd);
 
+                    /*
                     itemtoAdd.setListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -191,6 +193,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                             v.getContext().startActivity(intent);
                         }
                     });
+                    */
 
                     itemtoAdd.setType(Constants.TYPE_PDF);
 

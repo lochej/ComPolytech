@@ -1,9 +1,13 @@
 package com.polytech.communicationpolytech;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.View;
 
 import java.io.File;
+import java.io.FilterInputStream;
+import java.io.Serializable;
 
 /**
  * Created by Jérémy on 21/04/2017.
@@ -11,12 +15,12 @@ import java.io.File;
  * doit gerer les fichiers PDF, PNG, et Video
  */
 
-public class FileItem {
+public class FileItem implements Parcelable {
 
     String title;
     int iconID;
     File file;
-    View.OnClickListener listener;
+    //View.OnClickListener listener;
     Bitmap thumbnailImage;
     int type;
 
@@ -67,11 +71,50 @@ public class FileItem {
         this.file = file;
     }
 
+    /*
     public View.OnClickListener getOnClickListener() {
         return listener;
     }
 
     public void setListener(View.OnClickListener listener) {
         this.listener = listener;
+    }
+    */
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(title);
+        dest.writeInt(iconID);
+        dest.writeSerializable(file);
+        dest.writeInt(type);
+        if(thumbnailImage!=null){
+            thumbnailImage.writeToParcel(dest,flags);
+        }
+
+
+    }
+
+    public static final Parcelable.Creator<FileItem> CREATOR
+            = new Parcelable.Creator<FileItem>() {
+        public FileItem createFromParcel(Parcel in) {
+            return new FileItem(in);
+        }
+
+        public FileItem[] newArray(int size) {
+            return new FileItem[size];
+        }
+    };
+
+    private FileItem(Parcel in) {
+        title = in.readString();
+        iconID = in.readInt();
+        file=(File) in.readSerializable();
+        type=in.readInt();
+        thumbnailImage=Bitmap.CREATOR.createFromParcel(in);
     }
 }

@@ -9,6 +9,8 @@ import java.util.Comparator;
 
 interface Constants {
 
+
+
     int passHash=1253867675;
 
     int TYPE_PDF=0;
@@ -38,10 +40,16 @@ interface Constants {
     String PATH_RESERVED="/Application Communication/Espace reserve";
     String PATH_RESEAU="/Application Communication/Reseau Polytech";
 
+    String CSV_FILENAME="formulaire.csv";
+
     Comparator<File> alphaComp=new Comparator<File>() {
         @Override
         public int compare(File o1, File o2) {
             return o1.getName().compareTo(o2.getName());
         }
     };
+
+
+
+
 }

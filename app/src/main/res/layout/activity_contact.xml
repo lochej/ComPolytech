@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/contact_hint"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textSize="24sp"
+                android:textSize="18sp"
                 android:text="@string/contact_hint_intro"/>
 
             <View
@@ -105,6 +105,8 @@
                 android:id="@+id/contact_spinner_news"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:spinnerMode="dialog"
+                android:padding="@dimen/spinnerMargin"
                 android:entries="@array/newsletter_option_news"
                 />
 
@@ -120,6 +122,8 @@
                 android:id="@+id/contact_spinner_from"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:spinnerMode="dialog"
+                android:padding="@dimen/spinnerMargin"
                 android:entries="@array/newsletter_option_from"
                 />
 
@@ -133,8 +137,8 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_margin="@dimen/windowsMargins"
         android:clickable="true"
         android:src="@drawable/ic_check_black_24dp"

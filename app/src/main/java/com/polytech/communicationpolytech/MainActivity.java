@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.api.client.testing.util.SecurityTestUtils;
 
 import java.util.List;
 
@@ -26,7 +27,12 @@ public class MainActivity extends AppCompatActivity {
 
         setTitle(R.string.home);
 
+        setup();
 
+
+    }
+
+    private void setup(){
         ImageView banner=(ImageView) findViewById(R.id.main_imgbanner);
         Glide.with(this).load(R.drawable.img_banner_polytech).into(banner);
 
@@ -37,7 +43,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
 
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     public void OnClickPolytech(View view){
