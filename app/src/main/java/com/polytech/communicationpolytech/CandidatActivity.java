@@ -20,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class CandidatActivity extends AppCompatActivity {
 
@@ -49,7 +51,23 @@ public class CandidatActivity extends AppCompatActivity {
 
         File candidatFolder=new File(sdFolder.getAbsolutePath() + Constants.PATH_CANDIDAT);
 
-        sectionFolders=candidatFolder.listFiles();
+        File[] folders=candidatFolder.listFiles();
+
+        ArrayList<File> listFolders= new ArrayList<>();
+
+        if(folders!=null){
+            for(int i=0; i<folders.length;i++){
+                File current=folders[i];
+                if(current.isDirectory()){
+                    listFolders.add(current);
+                }
+            }
+        }
+
+        Collections.sort(listFolders,Constants.alphaComp);
+
+        sectionFolders=listFolders.toArray(new File[]{});
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

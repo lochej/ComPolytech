@@ -19,6 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class Polytech2Activity extends AppCompatActivity {
 
@@ -40,7 +43,25 @@ public class Polytech2Activity extends AppCompatActivity {
 
         File polytechFolder=new File(sdFolder.getAbsolutePath() + Constants.PATH_POLYTECH);
 
-        sectionFolders=polytechFolder.listFiles();
+        File[] folders=polytechFolder.listFiles();
+
+        ArrayList<File> listFolders= new ArrayList<>();
+
+        if(folders!=null){
+            for(int i=0; i<folders.length;i++){
+                File current=folders[i];
+                if(current.isDirectory()){
+                    listFolders.add(current);
+                }
+            }
+        }
+
+        Collections.sort(listFolders,Constants.alphaComp);
+
+
+        sectionFolders=listFolders.toArray(new File[]{});
+
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

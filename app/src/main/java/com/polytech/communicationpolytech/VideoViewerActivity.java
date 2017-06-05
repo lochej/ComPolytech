@@ -2,6 +2,7 @@ package com.polytech.communicationpolytech;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -77,7 +78,8 @@ public class VideoViewerActivity extends AppCompatActivity {
             setTitle(newTitle);
 
             //playFab.setVisibility(View.GONE);
-            videoView.setVideoPath(videoFile.getAbsolutePath());
+            videoView.setVideoURI(Uri.fromFile(videoFile));
+            //videoView.setVideoPath(videofile.getAbsolutePath());
 
 
 
@@ -105,7 +107,7 @@ public class VideoViewerActivity extends AppCompatActivity {
                     //Mise a jour du layout
                     videoView.requestLayout();
 
-                    mp.start();
+                    videoView.start();
                 }
             });
 

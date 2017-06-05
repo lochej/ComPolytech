@@ -2,8 +2,27 @@
 <resources>
 
 
-    <string-array name="newsletter_option">
-        
+    <string-array name="newsletter_option_news">
+        <item>Non renseigné</item>
+        <item>PeiP</item>
+        <item>PeiP Math</item>
+        <item>PeiP Physique</item>
+        <item>3A Info</item>
+        <item>3A Info-Indus Apprentissage</item>
+        <item>3A Electro</item>
+        <item>3A Mécanique</item>
+        <item>3A Aménagement</item>
+
+    </string-array>
+
+    <string-array name="newsletter_option_from">
+        <item>Non renseigné</item>
+        <item>PeiP 1 (Bac +1)</item>
+        <item>PeiP 2 (Bac +2)</item>
+        <item>Bac S</item>
+        <item>Bac STI2D</item>
+        <item>Collège</item>
+        <item>Étude sup. Bac +1 -> Bac +5</item>
     </string-array>
 
 </resources>

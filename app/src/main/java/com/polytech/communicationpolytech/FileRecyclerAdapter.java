@@ -8,6 +8,8 @@ import android.media.MediaPlayer;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -35,11 +37,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+
 /**
  * Created by Jérémy on 07/04/2017.
  */
 
 public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static int WHAT_PREEXECUTE=-1;
+    private static int WHAT_IMAGELOADED=-2;
+    private static int WHAT_CANCEL=-3;
+    private static int WHAT_LOADING=-4;
+
+
+
 
     public class PdfViewHolder extends RecyclerView.ViewHolder{
 
@@ -51,8 +62,51 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private FileItem currentItem;
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
+        private GenerateBitmapThread generateBitmapThread;
 
         Context context;
+
+        Handler handler=new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+
+                switch (msg.what){
+                    case Constants.WHAT_PREEXECUTE:
+                        placeholder.setVisibility(View.VISIBLE);
+                        PdfViewHolder.this.setIsRecyclable(false);
+
+                        return true;
+                    case Constants.WHAT_IMAGELOADED:
+
+                        currentItem.setThumbnailImage((Bitmap) msg.obj);
+                        placeholder.setVisibility(View.GONE);
+                        //Sauvegarde du Bitmap dans le cache
+                        currentItem.setThumbnailImage(currentItem.getThumbnailImage());
+                        imgThumb.setImageBitmap(currentItem.getThumbnailImage());
+                        PdfViewHolder.this.setIsRecyclable(true);
+
+                        return true;
+                    case Constants.WHAT_LOADING:
+
+
+                        return true;
+                    case Constants.WHAT_CANCEL:
+
+
+                        return true;
+                }
+
+                return false;
+            }
+        });
+
+        public GenerateBitmapThread getGenerateBitmapThread() {
+            return generateBitmapThread;
+        }
+
+        public void setGenerateBitmapThread(GenerateBitmapThread generateBitmapThread) {
+            this.generateBitmapThread = generateBitmapThread;
+        }
 
         public PdfViewHolder(View itemView) {
             super(itemView);
@@ -114,10 +168,15 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     //Sinon on lance le chargement
                     else{
 
+
                         //Chargement de la miniatur
                         pdfThumbTask=new LoadPDFThumbTask(itemView.getContext(),PdfViewHolder.this,currentItem.getFile());
                         pdfThumbTask.execute();
 
+                        /*
+                        generateBitmapThread=new GenerateBitmapThread(handler,context,Constants.TYPE_PDF,currentItem.getFile());
+                        generateBitmapThread.start();
+                        */
                         Log.d(TAG,"Generating Bitmap");
 
                     }
@@ -212,7 +271,53 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private TextView placeholder;
         private LoadVideoThumbTask videoThumbTask;
         Context context;
+        GenerateBitmapThread generateBitmapThread;
 
+        Handler handler=new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+
+                switch (msg.what){
+                    case Constants.WHAT_PREEXECUTE:
+                        placeholder.setVisibility(View.VISIBLE);
+                        VideoViewHolder.this.setIsRecyclable(false);
+
+                        return true;
+                    case Constants.WHAT_IMAGELOADED:
+
+                        currentItem.setThumbnailImage((Bitmap) msg.obj);
+                        placeholder.setVisibility(View.GONE);
+                        //Sauvegarde du Bitmap dans le cache
+                        currentItem.setThumbnailImage(currentItem.getThumbnailImage());
+                        imgThumb.setImageBitmap(currentItem.getThumbnailImage());
+                        VideoViewHolder.this.setIsRecyclable(true);
+
+                        return true;
+                    case Constants.WHAT_LOADING:
+
+
+                        return true;
+                    case Constants.WHAT_CANCEL:
+
+
+                        return true;
+                }
+
+                return false;
+            }
+        });
+
+        public GenerateBitmapThread getGenerateBitmapThread() {
+            return generateBitmapThread;
+        }
+
+        public void setGenerateBitmapThread(GenerateBitmapThread generateBitmapThread) {
+            this.generateBitmapThread = generateBitmapThread;
+        }
+
+        public LoadVideoThumbTask getVideoThumbTask(){
+            return videoThumbTask;
+        }
 
         public VideoViewHolder(View itemView) {
             super(itemView);
@@ -401,9 +506,16 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     }
                     //Sinon on lance le chargement
                     else{
+
+                        /*
                         //Chargement de la miniatur
                         videoThumbTask=new LoadVideoThumbTask(itemView.getContext(),VideoViewHolder.this,currentItem.getFile());
                         videoThumbTask.execute();
+                        */
+
+
+                        generateBitmapThread=new GenerateBitmapThread(handler,itemView.getContext(),Constants.TYPE_VIDEO,currentItem.getFile());
+                        generateBitmapThread.start();
 
                         Log.d(TAG,"Generating Bitmap");
                     }
@@ -876,6 +988,66 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             currentItem.setThumbnailImage(bitmap);
             intoView.setImageBitmap(bitmap);
             viewHolder.setIsRecyclable(true);
+        }
+    }
+
+    public class GenerateBitmapThread extends Thread{
+
+        Handler mHandler;
+        int type;
+        Context context;
+        File inputFile;
+
+        public GenerateBitmapThread(Handler mHandler,Context context,int type,File inputFile) {
+            this.mHandler=mHandler;
+            this.type=type;
+            this.context=context;
+            this.inputFile=inputFile;
+        }
+
+        @Override
+        public synchronized void start() {
+            super.start();
+        }
+
+        @Override
+        public void run() {
+
+            mHandler.obtainMessage(WHAT_PREEXECUTE).sendToTarget();
+
+            mHandler.obtainMessage(WHAT_LOADING).sendToTarget();
+
+            Bitmap image=null;
+            if(type == Constants.TYPE_PDF){
+
+                try {
+                    PdfiumCore core=new PdfiumCore(context);
+                    image=getPdfThumbnail(context,core,inputFile,null);
+                    mHandler.obtainMessage(WHAT_IMAGELOADED,image).sendToTarget();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    mHandler.obtainMessage(WHAT_CANCEL);
+                }
+
+
+            }
+            if(type == Constants.TYPE_VIDEO){
+
+                image=getVideoThumbnail(context,inputFile);
+                mHandler.obtainMessage(WHAT_IMAGELOADED,image).sendToTarget();
+            }
+
+            //mHandler.obtainMessage(WHAT_CANCEL);
+
+
+
+
+        }
+
+        @Override
+        public void interrupt() {
+            super.interrupt();
+            mHandler.obtainMessage(WHAT_CANCEL);
         }
     }
 

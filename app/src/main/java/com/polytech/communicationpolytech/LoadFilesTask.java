@@ -44,6 +44,10 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                 return -1;
             }
 
+            if(o1.isDirectory() && o2.isDirectory()){
+                return -o1.getName().compareTo(o2.getName());
+            }
+
             int type1=getTypeByFile(o1);
 
             int type2=getTypeByFile(o2);
@@ -70,31 +74,18 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
         this.progressDialog=progressDialog;
     }
 
+
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+
         //Show the placeholder Dialog
         if(progressDialog!=null) progressDialog.show();
     }
 
     @Override
     protected void onPostExecute(List<FileItem> fileItems) {
-        final FileRecyclerAdapter adapter=new FileRecyclerAdapter(context,fileItems);
-        recyclerView.setAdapter(adapter);
-
-        /*
-        ((GridLayoutManager)recyclerView.getLayoutManager()).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                if(adapter.getItemViewType(position)== Constants.TYPE_VIDEO || adapter.getItemViewType(position)== Constants.TYPE_SEPARATOR ){
-                    return 2;
-                }
-                return 1;
-            }
-        });
-        */
-
-        ((GridLayoutManager)recyclerView.getLayoutManager()).setSpanSizeLookup(new FileRecyclerAdapter.SpanSizeLookup(adapter));
+        setAdapter(recyclerView,fileItems);
 
         //Hide the placeholder progress dialog
         if(progressDialog!=null) progressDialog.hide();
@@ -118,8 +109,6 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     @Override
     protected List<FileItem> doInBackground(File... params) {
 
-
-
         //File externalDir= context.getExternalFilesDir(null); //Prend la racine du repertoire privé de l'app sur la carte sd
 
         File externalDir=params[0];
@@ -132,7 +121,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
     }
 
 
-    private void fillFileItemListFromFolder(ArrayList<FileItem> fileitems, File rootFolder,boolean isRoot){
+    public static void fillFileItemListFromFolder(ArrayList<FileItem> fileitems, File rootFolder,boolean isRoot){
 
         File[] foundFiles=rootFolder.listFiles();
 
@@ -277,5 +266,25 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
 
         return Constants.TYPE_UNKNOWN;
     }
+
+    public static void setAdapter(RecyclerView recyclerView, List<FileItem> fileItems){
+        final FileRecyclerAdapter adapter=new FileRecyclerAdapter(recyclerView.getContext(),fileItems);
+        recyclerView.setAdapter(adapter);
+
+        /*
+        ((GridLayoutManager)recyclerView.getLayoutManager()).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if(adapter.getItemViewType(position)== Constants.TYPE_VIDEO || adapter.getItemViewType(position)== Constants.TYPE_SEPARATOR ){
+                    return 2;
+                }
+                return 1;
+            }
+        });
+        */
+
+        ((GridLayoutManager)recyclerView.getLayoutManager()).setSpanSizeLookup(new FileRecyclerAdapter.SpanSizeLookup(adapter));
+    }
+
 
 }

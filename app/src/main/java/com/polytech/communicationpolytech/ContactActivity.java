@@ -10,12 +10,14 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.TreeMap;
 
 public class ContactActivity extends AppCompatActivity {
 
@@ -27,6 +29,8 @@ public class ContactActivity extends AppCompatActivity {
     TextView titlenom;
     TextView titleprenom;
     TextView titlemail;
+    Spinner study;
+    Spinner newsletter;
     Drawable mailbg;
     CoordinatorLayout content;
 
@@ -43,6 +47,9 @@ public class ContactActivity extends AppCompatActivity {
         nom=(EditText) findViewById(R.id.contact_nameEditText);
         prenom=(EditText) findViewById(R.id.contact_firstNameEditText);
         mail=(EditText) findViewById(R.id.contact_mailEditText);
+        study=(Spinner) findViewById(R.id.contact_spinner_from);
+        newsletter=(Spinner) findViewById(R.id.contact_spinner_news);
+
 
         titlemail=(TextView) findViewById(R.id.contact_titleEmail);
         titlemail.setText(getString(R.string.e_mail)+getString(R.string.star));
@@ -68,23 +75,40 @@ public class ContactActivity extends AppCompatActivity {
 
     public void OnConfirmForm(View v){
 
-        String[] data=new String[3];
+        String[] data=new String[5];
         String nom=this.nom.getText().toString();
         String prenom=this.prenom.getText().toString();
         String mail=this.mail.getText().toString();
+        String study=((TextView)this.study.getSelectedView()).getText().toString();
+        String newsletter=((TextView)this.newsletter.getSelectedView()).getText().toString();
+
+
 
         if(isValidEmailAddress(mail)){
             Snackbar snack=Snackbar.make(content,"OK",Snackbar.LENGTH_SHORT);
             snack.getView().setBackgroundColor(ContextCompat.getColor(v.getContext(),R.color.greenLock));
             snack.show();
 
+
+            CSVformatter.CSVEntry entry=new CSVformatter.CSVEntry(nom,prenom,newsletter,study,mail);
             data[0]=prenom;
             data[1]=nom;
             data[2]=mail;
+            data[3]=study;
+            data[4]=newsletter;
 
             try {
-                saveCSVFile(null,false,data);
-            } catch (IOException e) {
+                saveCSVFile(null,false,entry);
+                Toast.makeText(v.getContext(),"Votre demande de renseignements a été prise en compte",Toast.LENGTH_LONG).show();
+                finish();
+
+            }
+            catch(RuntimeException e){
+                Toast.makeText(this,"Une demande comportant les mêmes informations à déjà été prise en compte",Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+            catch (IOException e) {
+
                 e.printStackTrace();
             }
 
@@ -117,15 +141,58 @@ public class ContactActivity extends AppCompatActivity {
 
         File csvFile=new File(externalDir.getAbsolutePath() + "/formulaire.csv");
 
+        int format=CSVformatter.FORMAT_CUSTOM;
+
         if(!csvFile.exists()){
-            CSVformatter.writeHeaderToOutputStream(csvFile,CSVformatter.FORMAT_GOOGLE);
-            CSVformatter.writeLineDataToFile(csvFile,line,CSVformatter.FORMAT_GOOGLE);
+
+
+            CSVformatter.writeHeaderToOutputStream(csvFile,format);
+            CSVformatter.writeLineDataToFile(csvFile,line,format);
         }
         else{
-            CSVformatter.writeLineDataToFile(csvFile,line,CSVformatter.FORMAT_GOOGLE);
+
+            TreeMap<String,CSVformatter.CSVEntry> entries=CSVformatter.extractTreemap(csvFile);
+
+
+            CSVformatter.writeLineDataToFile(csvFile,line,format);
         }
 
 
+
+    }
+
+    public void saveCSVFile(File intoFile, boolean append, CSVformatter.CSVEntry entry) throws IOException {
+
+        File externalDir=getExternalFilesDir(null);
+
+        File csvFile=new File(externalDir.getAbsolutePath() + "/formulaire.csv");
+
+        int format=CSVformatter.FORMAT_CUSTOM;
+
+
+
+        if(!csvFile.exists()){
+
+
+            CSVformatter.writeHeaderToOutputStream(csvFile,format);
+            CSVformatter.writeLineDataToFile(csvFile,entry,format);
+        }
+        else{
+
+            TreeMap<String,CSVformatter.CSVEntry> entries=CSVformatter.extractTreemap(csvFile);
+
+
+            if(entry.equals(entries.get(entry.getMail()))){
+                throw new RuntimeException("Entry already exists");
+                //Toast.makeText(this,"Une demande identique existante",Toast.LENGTH_LONG).show();
+            }
+            else{
+                entries.put(entry.getMail(),entry);
+                CSVformatter.writeTreemapToFile(csvFile,entries,format);
+            }
+
+
+        }
 
     }
 

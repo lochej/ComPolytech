@@ -93,6 +93,36 @@
                 android:inputType="textEmailAddress"
                 />
 
+            <TextView
+                android:id="@+id/contact_titleSpinnerNews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Je souhaite être renseigné à propos de:"
+                style="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+
+            <Spinner
+                android:id="@+id/contact_spinner_news"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/newsletter_option_news"
+                />
+
+
+            <TextView
+                android:id="@+id/contact_titleSpinnerFrom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="J'étudie actuellement en:"
+                style="@android:style/TextAppearance.DeviceDefault.Large"
+                />
+            <Spinner
+                android:id="@+id/contact_spinner_from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:entries="@array/newsletter_option_from"
+                />
+
 
         </LinearLayout>
 

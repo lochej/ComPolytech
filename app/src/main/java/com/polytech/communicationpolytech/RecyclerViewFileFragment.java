@@ -11,6 +11,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
+
+import static com.polytech.communicationpolytech.LoadFilesTask.fillFileItemListFromFolder;
+import static com.polytech.communicationpolytech.LoadFilesTask.setAdapter;
 
 /**
  * Created by jeloc on 14/05/2017.
@@ -69,7 +73,16 @@ public class RecyclerViewFileFragment extends Fragment {
             placeholder.setVisibility(View.VISIBLE);
         }
         else {
-            loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(rootFile);
+
+            File externalDir=rootFile;
+
+            ArrayList<FileItem> fileitems=new ArrayList<>();
+
+            fillFileItemListFromFolder(fileitems,externalDir,true);
+
+            setAdapter(recyclerView,fileitems);
+
+            //loadTask =new LoadFilesTask(rootView.getContext(),recyclerView,null).execute(rootFile);
         }
 
 
@@ -99,8 +112,28 @@ public class RecyclerViewFileFragment extends Fragment {
 
                 FileRecyclerAdapter.PdfViewHolder pdfHolder=(FileRecyclerAdapter.PdfViewHolder) holder;
 
+                if(pdfHolder.getGenerateBitmapThread() != null && pdfHolder.getGenerateBitmapThread().isAlive()){
+                    pdfHolder.getGenerateBitmapThread().interrupt();
+                }
+
                 if(pdfHolder.getPdfThumbTask() != null && pdfHolder.getPdfThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
                     pdfHolder.getPdfThumbTask().cancel(true);
+                }
+            }
+
+            //Si c'est un Holder PDF
+            else if(holder instanceof FileRecyclerAdapter.VideoViewHolder){
+
+                FileRecyclerAdapter.VideoViewHolder videoHolder=(FileRecyclerAdapter.VideoViewHolder) holder;
+
+                /*
+                if(videoHolder.getGenerateBitmapThread() != null && videoHolder.getGenerateBitmapThread().isAlive()){
+                    videoHolder.getGenerateBitmapThread().interrupt();
+                }
+                */
+                
+                if(videoHolder.getVideoThumbTask() != null && videoHolder.getVideoThumbTask().getStatus() == AsyncTask.Status.RUNNING ){
+                    videoHolder.getVideoThumbTask().cancel(true);
                 }
             }
 

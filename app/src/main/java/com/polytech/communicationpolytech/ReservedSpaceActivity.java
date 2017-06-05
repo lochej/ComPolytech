@@ -354,6 +354,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
         //Mise en place du dialog de checking Google Drive
         mCheckForUpdatesProgress = new ProgressDialog(this);
+        mCheckForUpdatesProgress.setCancelable(true);
         mCheckForUpdatesProgress.setMessage(getString(R.string.check_for_updates_drive));
 
         //Mise en place du Dialog à afficher lors des téléchargement
@@ -363,7 +364,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         mDlProgress.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         mDlProgress.setTitle(getString(R.string.downloading_Files));
         mDlProgress.setMessage("");
-        mDlProgress.setCancelable(false);
+        mDlProgress.setCancelable(true);
 
 
         // Initialize credentials and service object.
@@ -453,6 +454,17 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 }
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mDownloadStartDialog !=null) mDownloadStartDialog.dismiss();
+        if(mDlProgress!=null){
+            mDlProgress.cancel();
+            mDlProgress.dismiss();
+        }
+        if(mCheckForUpdatesProgress !=null) mCheckForUpdatesProgress.dismiss();
     }
 
     /**
@@ -792,6 +804,8 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         private com.google.api.services.drive.Drive mService=null;
         private final String bundleIndex="index";
         private final String bundlerFileName ="filename";
+        private Exception mLastError;
+        private java.io.File currentFile;
 
 
         public DLfileTask(GoogleAccountCredential credential) {
@@ -831,12 +845,21 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
                 publishProgress(progressValues);
 
-                try {
-                    downloadDriveFileToStorage(mService,id);
+                currentFile=Storage_Treemap.get(id);
 
+                try {
+
+                    downloadDriveFileToStorage(mService,id);
+                    Log.d("DOWNLOADED","Succesfully downloaded:"+Drive_Treemap.get(id).getName() +" | "+ id);
                 } catch (IOException e) {
+
+                    //Le téléchargement s'est mal passé, il faut supprimer le fichier courant pour de garder un fichier corrompu
+                    currentFile.delete();
                     e.printStackTrace();
+                    mLastError=e;
+                    Log.e("DOWNLOAD Task",e.getMessage());
                     cancel(true);
+                    return null;
                 }
 
 
@@ -905,6 +928,12 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             super.onPreExecute();
             mDlProgress.setProgress(0);
             mDlProgress.show();
+            mDlProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                }
+            });
         }
 
         @Override
@@ -925,6 +954,21 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         protected void onCancelled() {
             super.onCancelled();
             mDlProgress.hide();
+            if(currentFile!=null){
+                if(currentFile.exists()){
+                    if(currentFile.delete()){
+                        showSnackBar(currentFile.getName()+": Supprimé",Snackbar.LENGTH_SHORT);
+                    }
+                    else{
+                        showSnackBar(currentFile.getName() + ": Echec suppression",Snackbar.LENGTH_SHORT);
+                    }
+                }
+            }
+
+            if(mLastError != null){
+                showSnackBar("Arrêt du téléchargement: "+ mLastError.getLocalizedMessage(),Snackbar.LENGTH_LONG);
+                return;
+            }
             showSnackBar("Tous les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_LONG);
             //Toast.makeText(ReservedSpaceActivity.this,"FILE NOT DOWNLOADED KOOOOO",Toast.LENGTH_SHORT).show();
         }
@@ -1070,6 +1114,12 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         protected void onPreExecute() {
             mOutputText.setText("");
             mCheckForUpdatesProgress.show();
+            mCheckForUpdatesProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    cancel(true);
+                }
+            });
         }
 
         @Override
@@ -1113,6 +1163,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         @Override
         protected void onCancelled() {
             mCheckForUpdatesProgress.hide();
+            showSnackBar("Vérification annulée",Snackbar.LENGTH_SHORT);
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(
@@ -1129,6 +1180,12 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             } else {
                 mOutputText.setText("Request cancelled.");
             }
+        }
+
+        @Override
+        protected void onCancelled(List<String> strings) {
+            super.onCancelled(strings);
+            onCancelled();
         }
     }
 
@@ -1178,7 +1235,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 public void onClick(DialogInterface dialog, int which) {
 
 
-                    new DLfileTask(mCredential).execute(toDlFiles.get(5), toDlFiles.get(6));//toDlFiles.toArray(new String[]{})[0]);
+                    new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
 
                     dialog.dismiss();
 
@@ -1197,7 +1254,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
                 List<String> toDlFiles=getFilesToDownload(false);
 
-                new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{})[0]);
+                new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
 
                 dialog.dismiss();
             }
