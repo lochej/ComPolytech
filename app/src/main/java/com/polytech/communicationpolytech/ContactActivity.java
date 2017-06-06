@@ -1,15 +1,21 @@
 package com.polytech.communicationpolytech;
 
+import android.content.Context;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +31,10 @@ public class ContactActivity extends AppCompatActivity {
 
     public final String TAG=ContactActivity.this.getClass().getSimpleName();
 
+    public static final String email_pattern="^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
+
+    public static final String email_pattern2="(.*)@(.*)";
+
     EditText nom;
     EditText prenom;
     EditText mail;
@@ -35,6 +45,8 @@ public class ContactActivity extends AppCompatActivity {
     Spinner newsletter;
     Drawable mailbg;
     CoordinatorLayout content;
+    ImageView invalid;
+    ImageView valid;
     File csvFile;
 
     @Override
@@ -56,15 +68,49 @@ public class ContactActivity extends AppCompatActivity {
         mail=(EditText) findViewById(R.id.contact_mailEditText);
         study=(Spinner) findViewById(R.id.contact_spinner_from);
         newsletter=(Spinner) findViewById(R.id.contact_spinner_news);
+        invalid=(ImageView) findViewById(R.id.contact_invalid_mail);
+        valid=(ImageView) findViewById(R.id.contact_valid_mail);
 
 
         titlemail=(TextView) findViewById(R.id.contact_titleEmail);
-        titlemail.setText(getString(R.string.e_mail)+getString(R.string.star));
+        titlemail.setText( getString(R.string.e_mail)+" "+getString(R.string.star));
         mailbg=mail.getBackground();
 
         content=(CoordinatorLayout) findViewById(R.id.contact_main_coordinator);
 
+        mail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                setColorsValidity(isValidEmailAddress(s.toString()));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        //setColorsValidity(false);
+    }
+
+    private void setColorsValidity(boolean valid){
+        if(valid){
+            //mail.setBackgroundColor(ContextCompat.getColor(this,R.color.greenLock));
+            mailbg.setColorFilter(ContextCompat.getColor(this,R.color.greenLock), PorterDuff.Mode.SRC_ATOP);
+            this.valid.setVisibility(View.VISIBLE);
+            this.invalid.setVisibility(View.GONE);
+        }
+        else{
+           //mail.setBackgroundColor(ContextCompat.getColor(this,R.color.redLock));
+            mailbg.setColorFilter(ContextCompat.getColor(this,R.color.redLock), PorterDuff.Mode.SRC_ATOP);
+            this.valid.setVisibility(View.GONE);
+            this.invalid.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -132,7 +178,7 @@ public class ContactActivity extends AppCompatActivity {
     }
 
     public static boolean isValidEmailAddress(String email) {
-        return email.matches("(.*)@(.*)") && getCharCount(email,'@')==1 ;
+        return email.matches(email_pattern) && getCharCount(email,'@')==1 ;
     }
 
     public static int getCharCount(String s,char character){

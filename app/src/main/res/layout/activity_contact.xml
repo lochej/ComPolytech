@@ -84,14 +84,51 @@
                 style="@android:style/TextAppearance.DeviceDefault.Large"
                 />
 
-            <EditText
-                android:id="@+id/contact_mailEditText"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/mail_example"
-                android:inputType="textEmailAddress"
-                />
+                android:layout_height="wrap_content">
+
+
+
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    >
+
+                    <ImageView
+                        android:id="@+id/contact_invalid_mail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_highlight_off_black_24dp"
+                        android:tint="@color/redLock"
+                        android:visibility="gone"/>
+
+                    <ImageView
+                        android:id="@+id/contact_valid_mail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_check_black_24dp"
+                        android:tint="@color/greenLock"
+                        android:visibility="gone"/>
+
+
+                </FrameLayout>
+
+                <EditText
+                    android:id="@+id/contact_mailEditText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/mail_example"
+                    android:inputType="textEmailAddress"
+                    android:backgroundTint="@color/redLock"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
 
             <TextView
                 android:id="@+id/contact_titleSpinnerNews"

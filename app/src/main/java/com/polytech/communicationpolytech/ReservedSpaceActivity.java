@@ -318,30 +318,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
     }
 
-    /**
-     *
-     */
-    private void readCSVEntries(){
-
-    }
-
-    /**
-     *
-     */
-    private void deleteCSVData(){
-        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
-
-        if(csvFile.exists()){
-            if(csvFile.delete()){
-                showColoredSnackBar(R.color.greenLock,"Données de contact effacées.",Snackbar.LENGTH_LONG);
-            }else{
-                showColoredSnackBar(R.color.redLock,"Échec de l'effacement des données de contact.",Snackbar.LENGTH_LONG);
-            }
-        }
-        else{
-            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
-        }
-    }
 
     //########################## APP LIFECYCLE ##########################
     @Override
@@ -399,19 +375,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
     }
 
-    private void showSnackBar(String message,int length){
-        Snackbar.make(mMainCoordinatorLayout,message,length).show();
-    }
 
-    private void showColoredSnackBar(int colorID,String message, int length){
-        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
-        snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
-        snack.show();
-    }
-
-    private void showSnackBar(int stringid, int length){
-        Snackbar.make(mMainCoordinatorLayout, stringid,length).show();
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -539,6 +503,79 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         // Do nothing.
     }
 
+    //##################### METHODS BOUTONS #######################
+
+
+    void onClickExportCsv(View v){
+
+        java.io.File csvFile=new java.io.File(sdRootFolder.getAbsolutePath() + "/formulaire.csv");
+
+        //Le fichier csv existe
+        if(csvFile.exists()){
+
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+
+            sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + csvFile.getAbsolutePath()));
+            sendIntent.setType("text/csv");
+
+            startActivity(Intent.createChooser(sendIntent ,"Partager via:"));
+        }else{
+            showSnackBar("Aucun formulaire à exporter.", Snackbar.LENGTH_LONG);
+        }
+
+
+    }
+
+    private void showSnackBar(String message,int length){
+        Snackbar.make(mMainCoordinatorLayout,message,length).show();
+    }
+
+    private void showColoredSnackBar(int colorID,String message, int length){
+        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
+        snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
+        snack.show();
+    }
+
+    private void showSnackBar(int stringid, int length){
+        Snackbar.make(mMainCoordinatorLayout, stringid,length).show();
+    }
+
+    private void consultCSVData(){
+        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
+
+        if(csvFile.exists()){
+
+            //TreeMap<String,CSVformatter.CSVEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
+            Intent startCSV=new Intent(this,CSVConsultActivity.class);
+            startActivity(startCSV);
+
+        }
+        else{
+            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
+        }
+    }
+
+    private void deleteCSVData(){
+        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
+
+        if(csvFile.exists()){
+
+            //TreeMap<String,CSVformatter.CSVEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
+
+
+            if(csvFile.delete()){
+                showColoredSnackBar(R.color.greenLock,"Données de contact effacées.",Snackbar.LENGTH_LONG);
+            }else{
+                showColoredSnackBar(R.color.redLock,"Échec de l'effacement des données de contact.",Snackbar.LENGTH_LONG);
+            }
+        }
+        else{
+            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
+        }
+    }
+
+    //############################ CLASSES VIEWPAGER FRAGMENT ####################
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -592,6 +629,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         Button mClearStorageButton;
         Button mShareCSVButton;
         Button mClearCSVButton;
+        Button mConsultCSVButton;
 
         /**
          * The fragment argument representing the section number for this
@@ -640,6 +678,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             mClearStorageButton=(Button) rootView.findViewById(R.id.reserved_reset_storage);
             mShareCSVButton = (Button) rootView.findViewById(R.id.reserved_export_csv);
             mClearCSVButton = (Button) rootView.findViewById(R.id.reserved_reset_csv);
+            mConsultCSVButton=(Button) rootView.findViewById(R.id.reserved_view_csv);
 
             mShareCSVButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -652,6 +691,13 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 @Override
                 public void onClick(View v) {
                     parentActivity.deleteCSVData();
+                }
+            });
+
+            mConsultCSVButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    parentActivity.consultCSVData();
                 }
             });
 
@@ -826,6 +872,107 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 connectionStatusCode,
                 REQUEST_GOOGLE_PLAY_SERVICES);
         dialog.show();
+    }
+
+    void askDownloadDialog(){
+
+        final List<String> toDlFiles=getFilesToDownload(true);
+
+        builder=new AlertDialog.Builder(this);
+
+
+        LayoutInflater inflater=this.getLayoutInflater();
+
+        View dialogView= inflater.inflate(R.layout.dialog_confirmdownload,null);
+
+        final CheckBox advancedOptions=(CheckBox) dialogView.findViewById(R.id.downloaddialog_advanced);
+
+        final TextView hintView=(TextView) dialogView.findViewById(R.id.downloaddialog_hint);
+
+
+        builder.setView(dialogView);
+        builder.setCancelable(true);
+
+        //Si il n'y a aucun fichier à télécharger
+        if(toDlFiles.size() == 0){
+            //Montrer un dialog avec juste retélécharger tout les fichiers et OK
+            String messageString="Tous les fichiers sont à jours. Il n'y a pas de nouveaux fichiers à télécharger.";
+
+            builder.setTitle("Aucune mise à jour disponible:");
+            builder.setMessage(messageString);
+
+            builder.setPositiveButton("OK", null);
+
+
+        }
+        else{
+            //Montrer un dialog avec télécharger les new fichiers, tout retélecharger et Pas maintenant
+            String messageString="Il y a " + toDlFiles.size() + " nouveaux fichiers disponible au téléchargement." +
+                    "\n"+
+                    "Le téléchargement peut prendre du temps ne quittez par l'application.";
+
+            builder.setTitle("Mise à jour disponible");
+            builder.setMessage(messageString);
+
+            builder.setPositiveButton("Télécharger les nouveaux fichiers", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+
+                    new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
+
+                    dialog.dismiss();
+
+                }
+            });
+
+            builder.setNegativeButton("Plus tard", null);
+
+        }
+
+
+
+        builder.setNeutralButton("Retélécharger tous les fichiers", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                List<String> toDlFiles=getFilesToDownload(false);
+
+                new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
+
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog= builder.create();
+
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final Button neutral=((AlertDialog) dialog).getButton(DialogInterface.BUTTON_NEUTRAL);
+                neutral.setTextColor(ContextCompat.getColor(ReservedSpaceActivity.this,R.color.redLock));
+
+                advancedOptions.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(isChecked){
+                            neutral.setVisibility(View.VISIBLE);
+                            hintView.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                            neutral.setVisibility(View.GONE);
+                            hintView.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
+                neutral.setVisibility(advancedOptions.isChecked() ? View.VISIBLE:View.GONE);
+                hintView.setVisibility(advancedOptions.isChecked() ? View.VISIBLE:View.GONE);
+            }
+        });
+
+        dialog.show();
+
     }
 
 
@@ -1228,126 +1375,6 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
     }
 
 
-    void askDownloadDialog(){
 
-        final List<String> toDlFiles=getFilesToDownload(true);
-
-        builder=new AlertDialog.Builder(this);
-
-
-        LayoutInflater inflater=this.getLayoutInflater();
-
-        View dialogView= inflater.inflate(R.layout.dialog_confirmdownload,null);
-
-        final CheckBox advancedOptions=(CheckBox) dialogView.findViewById(R.id.downloaddialog_advanced);
-
-        final TextView hintView=(TextView) dialogView.findViewById(R.id.downloaddialog_hint);
-
-
-        builder.setView(dialogView);
-        builder.setCancelable(true);
-
-        //Si il n'y a aucun fichier à télécharger
-        if(toDlFiles.size() == 0){
-            //Montrer un dialog avec juste retélécharger tout les fichiers et OK
-            String messageString="Tous les fichiers sont à jours. Il n'y a pas de nouveaux fichiers à télécharger.";
-
-            builder.setTitle("Aucune mise à jour disponible:");
-            builder.setMessage(messageString);
-
-            builder.setPositiveButton("OK", null);
-
-
-        }
-        else{
-            //Montrer un dialog avec télécharger les new fichiers, tout retélecharger et Pas maintenant
-            String messageString="Il y a " + toDlFiles.size() + " nouveaux fichiers disponible au téléchargement." +
-                    "\n"+
-                    "Le téléchargement peut prendre du temps ne quittez par l'application.";
-
-            builder.setTitle("Mise à jour disponible");
-            builder.setMessage(messageString);
-
-            builder.setPositiveButton("Télécharger les nouveaux fichiers", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-
-
-                    new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
-
-                    dialog.dismiss();
-
-                }
-            });
-
-            builder.setNegativeButton("Plus tard", null);
-
-        }
-
-
-
-        builder.setNeutralButton("Retélécharger tous les fichiers", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                List<String> toDlFiles=getFilesToDownload(false);
-
-                new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
-
-                dialog.dismiss();
-            }
-        });
-
-        AlertDialog dialog= builder.create();
-
-        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                final Button neutral=((AlertDialog) dialog).getButton(DialogInterface.BUTTON_NEUTRAL);
-                neutral.setTextColor(ContextCompat.getColor(ReservedSpaceActivity.this,R.color.redLock));
-
-                advancedOptions.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        if(isChecked){
-                            neutral.setVisibility(View.VISIBLE);
-                            hintView.setVisibility(View.VISIBLE);
-                        }
-                        else{
-                            neutral.setVisibility(View.GONE);
-                            hintView.setVisibility(View.GONE);
-                        }
-                    }
-                });
-
-                neutral.setVisibility(advancedOptions.isChecked() ? View.VISIBLE:View.GONE);
-                hintView.setVisibility(advancedOptions.isChecked() ? View.VISIBLE:View.GONE);
-            }
-        });
-
-        dialog.show();
-
-    }
-
-    void onClickExportCsv(View v){
-
-        java.io.File csvFile=new java.io.File(sdRootFolder.getAbsolutePath() + "/formulaire.csv");
-
-        //Le fichier csv existe
-        if(csvFile.exists()){
-
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-
-            sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + csvFile.getAbsolutePath()));
-            sendIntent.setType("text/csv");
-
-            startActivity(Intent.createChooser(sendIntent ,"Partager via:"));
-        }else{
-            showSnackBar("Aucun formulaire à exporter.", Snackbar.LENGTH_LONG);
-        }
-
-
-    }
 
 }

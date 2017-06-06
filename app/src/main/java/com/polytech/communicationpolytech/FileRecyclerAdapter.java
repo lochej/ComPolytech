@@ -28,11 +28,7 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import com.bumptech.glide.Glide;
-import com.davemorrissey.labs.subscaleview.ImageSource;
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
-import com.davemorrissey.labs.subscaleview.decoder.DecoderFactory;
-import com.davemorrissey.labs.subscaleview.decoder.ImageDecoder;
-import com.davemorrissey.labs.subscaleview.decoder.ImageRegionDecoder;
+
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
@@ -41,11 +37,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
-import de.number42.subsampling_pdf_decoder.PDFDecoder;
-import de.number42.subsampling_pdf_decoder.PDFRegionDecoder;
-
-import static com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP;
 
 
 /**
@@ -123,7 +114,7 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
         private GenerateBitmapThread generateBitmapThread;
-        private SubsamplingScaleImageView pdfThumb;
+        //private SubsamplingScaleImageView pdfThumb;
 
         Context context;
 

@@ -29,12 +29,9 @@
         <!-- android:theme="@style/HomeTheme" -->
 
         <activity android:name=".ReseauActivity" />
-
         <activity
             android:name=".ReservedSpaceActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            />
-
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ContactActivity"
             android:windowSoftInputMode="adjustResize" />
@@ -52,7 +49,8 @@
         <activity
             android:name=".Polytech2Activity"
             android:label="@string/title_activity_polytech2"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".CSVConsultActivity"></activity>
     </application>
 
 </manifest>

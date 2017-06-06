@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static com.polytech.communicationpolytech.LoadFilesTask.fillFileItemListFromFolder;
@@ -289,6 +290,7 @@ public class RecyclerViewFileFragment extends Fragment {
                 File externalDir=rootFile;
 
                 ArrayList<FileItem> fileitems=new ArrayList<>();
+
 
                 fillFileItemListFromFolder(fileitems,externalDir,true);
 
