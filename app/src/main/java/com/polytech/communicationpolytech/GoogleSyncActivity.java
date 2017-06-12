@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -74,7 +75,11 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
     AlertDialog.Builder builder;
     TextView mOutputText;
     ListView listDownloadItem;
+    Button syncButton;
+    TextView hintText;
 
+    LinearLayout downloadContent;
+    LinearLayout placeHolder;
 
     //############# DRIVE VARIABLES #################
 
@@ -137,9 +142,13 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
         listDownloadItem.setTag(mCustomHeaders);
         listDownloadItem.addHeaderView(mCustomHeaders);
 
+        placeHolder=(LinearLayout) findViewById(R.id.googleSync_placeholder);
 
-        Button searchMAJ=(Button) findViewById(R.id.googleSync_maj);
-        searchMAJ.setOnClickListener(new View.OnClickListener() {
+        mOutputText = (TextView) findViewById(R.id.googleSync_hint);
+
+        syncButton = (Button) findViewById(R.id.googleSync_buttonSync);
+
+        syncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 syncWithGoogle();
@@ -154,9 +163,12 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
             }
         });
 
-        mOutputText=new TextView(this);
+        downloadContent = (LinearLayout) findViewById(R.id.googleSync_downloadContent);
+
 
         setupGoogleCredentials();
+
+        setDownloadContentVisibility(false);
     }
 
     @Override
@@ -289,12 +301,30 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
     }
 
     private void showColoredSnackBar(int colorID,String message, int length){
-        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
+        final Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
         snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
+
+        if(length==Snackbar.LENGTH_INDEFINITE){
+            snack.setAction("OK", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    snack.dismiss();
+                }
+            });
+        }
         snack.show();
     }
 
+    private void setDownloadContentVisibility(boolean show){
 
+        if(show){
+            placeHolder.setVisibility(View.GONE);
+            downloadContent.setVisibility(View.VISIBLE);
+        }else{
+            placeHolder.setVisibility(View.VISIBLE);
+            downloadContent.setVisibility(View.GONE);
+        }
+    }
 
     //###################### DRIVE FILE SYNC METHODS ###########################
 
@@ -566,6 +596,9 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
     }
 
 
+    /**
+     * Crée une liste des fichiers dont le tag de téléchargement est à True et lance la tache de telechargement
+     */
     private void downloadSelectedFiles(){
 
         ArrayList <String> toDlFiles=new ArrayList<>();
@@ -577,6 +610,11 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
             if(wrapper.isToDownload()){
                 toDlFiles.add(ID);
             }
+        }
+
+        if(toDlFiles.size() <= 0){
+            showColoredSnackBar(R.color.colorAccent,"Aucun fichier sélectionné pour le téléchargement.",Snackbar.LENGTH_LONG);
+            return;
         }
 
         new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
@@ -983,10 +1021,10 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
             }
 
             if(mLastError != null){
-                showSnackBar("Arrêt du téléchargement: "+ mLastError.getLocalizedMessage(),Snackbar.LENGTH_LONG);
+                showColoredSnackBar(R.color.redLock,"Arrêt du téléchargement: "+ mLastError.getLocalizedMessage(),Snackbar.LENGTH_INDEFINITE);
                 return;
             }
-            showSnackBar("Tous les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_LONG);
+            showColoredSnackBar(R.color.redLock,"Tous les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_INDEFINITE);
             //Toast.makeText(ReservedSpaceActivity.this,"FILE NOT DOWNLOADED KOOOOO",Toast.LENGTH_SHORT).show();
         }
     }
@@ -1133,7 +1171,7 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
 
         @Override
         protected void onPreExecute() {
-            mOutputText.setText("");
+            mOutputText.setText(R.string.not_checked_for_updates_yet);
             mCheckForUpdatesProgress.show();
             mCheckForUpdatesProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
@@ -1174,19 +1212,25 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
 
             fillToDownloadFilesListView();
 
+            setDownloadContentVisibility(true);
+
+            showColoredSnackBar(R.color.greenLock,"Vérification effectuée.",Snackbar.LENGTH_SHORT);
 
             if (output == null || output.size() == 0) {
-                mOutputText.setText("No results returned.");
+                //mOutputText.setText("No results returned.");
             } else {
-                output.add(0, "Data retrieved using the Drive API:");
-                mOutputText.setText(TextUtils.join("\n", output));
+                //output.add(0, "Data retrieved using the Drive API:");
+                //mOutputText.setText(TextUtils.join("\n", output));
             }
         }
 
         @Override
         protected void onCancelled() {
+            setDownloadContentVisibility(false);
             mCheckForUpdatesProgress.hide();
-            showSnackBar("Vérification annulée",Snackbar.LENGTH_SHORT);
+            showColoredSnackBar(R.color.redLock,"Vérification annulée",Snackbar.LENGTH_SHORT);
+
+
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(
@@ -1195,13 +1239,17 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
                 } else if (mLastError instanceof UserRecoverableAuthIOException) {
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
-                            ReservedSpaceActivity.REQUEST_AUTHORIZATION);
+                            GoogleSyncActivity.REQUEST_AUTHORIZATION);
                 } else {
-                    mOutputText.setText("The following error occurred:\n"
+                    mOutputText.setText("Veuillez réessayer la vérification." +
+                            "\n" +
+                            "Une erreur s'est produite:\n"
                             + mLastError.getMessage());
                 }
             } else {
-                mOutputText.setText("Request cancelled.");
+                mOutputText.setText("Vérification annulée." +
+                        "\n" +
+                        "Veuillez réessayer la vérification.");
             }
         }
 

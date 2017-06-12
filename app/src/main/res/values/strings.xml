@@ -34,5 +34,6 @@
     <string name="title_activity_polytech2">Polytech2Activity</string>
     <string name="check_for_updates_drive">Vérification des mises à jours de fichiers...</string>
     <string name="downloading_Files">Téléchargement des fichiers</string>
+    <string name="not_checked_for_updates_yet">Les mises à jours de fichiers n\'ont pas encore été vérifiés.</string>
 
 </resources>

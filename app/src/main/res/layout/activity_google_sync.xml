@@ -7,37 +7,84 @@
     android:id="@+id/googleSync_mainContent"
     tools:context="com.polytech.communicationpolytech.GoogleSyncActivity">
 
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:text="Cette fenêtre permet de télécharger les fichiers utilisés dans l'application dans l'application depuis Google Drive."/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1E000000"
+            />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="center"
+            android:id="@+id/googleSync_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/googleSync_hint"
+                android:text="Les mises à jours de fichiers n'ont pas encore été vérifiés."/>
+
+            <Button
+                android:id="@+id/googleSync_buttonSync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_sync_black_24dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Vérifier les mises à jours."
+                />
+
+        </LinearLayout>
 
 
 
 
         <LinearLayout
+            android:id="@+id/googleSync_downloadContent"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            >
 
-            <Button
-                android:id="@+id/googleSync_maj"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Rechercher maj"/>
+
 
             <Button
                 android:id="@+id/googleSync_downloadSelected"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Rechercher maj"/>
+                android:ellipsize="end"
+                android:drawableStart="@drawable/ic_cloud_download_black_24dp"
+                android:text="Télécharger les fichiers sélectionnées"/>
 
             <ListView
                 android:id="@+id/googleSync_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:nestedScrollingEnabled="false"
                 />
 
 
 
         </LinearLayout>
+
+    </LinearLayout>
+
+
+
+
 
 
 

@@ -4,7 +4,7 @@
 
     <item android:title="Rechercher màj"
         android:id="@+id/googleSync_menu_refresh"
-        android:icon="@drawable/ic_refresh_white_24dp"
+        android:icon="@drawable/ic_sync_white_24dp"
         app:showAsAction="withText|ifRoom"/>
 
 </menu>

@@ -11,13 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Call drive api" />
+        -->
 
     <Button
-        android:id="@+id/reserved_download"
+        android:id="@+id/reserved_googleSyncActivity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Download Files" />
-       -->
+        android:drawableStart="@drawable/ic_sync_black_24dp"
+        android:text="Synchronisation des données" />
+
 
     <Button
         android:id="@+id/reserved_view_csv"
@@ -47,15 +49,6 @@
         android:drawableStart="@drawable/ic_delete_forever_black_24dp"
         android:text="Effacer toutes les données" />
 
-    <android.support.v4.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/reserved_output_textview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
-    </android.support.v4.widget.NestedScrollView>
 
 
 </LinearLayout>
