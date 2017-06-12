@@ -50,7 +50,8 @@
             android:name=".Polytech2Activity"
             android:label="@string/title_activity_polytech2"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CSVConsultActivity"></activity>
+        <activity android:name=".CSVConsultActivity" />
+        <activity android:name=".GoogleSyncActivity"></activity>
     </application>
 
 </manifest>

@@ -20,4 +20,13 @@
         android:layout_marginEnd="@dimen/activity_horizontal_margin"
         android:textColor="@color/redLock"
         android:text="Retélécharger tous les fichiers peut prendre beaucoup de temps. \n Ne quittez pas l'application."/>
+
+    <ListView
+        android:id="@+id/downloaddialog_selectFiles"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
+
+
 </LinearLayout>

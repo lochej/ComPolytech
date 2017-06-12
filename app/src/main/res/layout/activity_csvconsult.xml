@@ -4,11 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/csvviewer_content"
     tools:context="com.polytech.communicationpolytech.CSVConsultActivity">
 
     <ListView
         android:id="@+id/csvviewer_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/csvviewer_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:text="Aucune entrés dans le formulaire de contact."
+        android:visibility="gone"/>
 
 </android.support.design.widget.CoordinatorLayout>

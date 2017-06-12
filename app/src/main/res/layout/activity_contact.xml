@@ -16,19 +16,18 @@
         android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/contact_content"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/windowsMargins"
-            android:layout_marginLeft="@dimen/windowsMargins"
             android:orientation="vertical"
-            >
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/windowsMargins"
+                android:layout_marginEnd="@dimen/windowsMargins"
                 android:id="@+id/contact_hint"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@android:color/black"
                 android:textSize="18sp"
                 android:text="@string/contact_hint_intro"/>
 
@@ -40,132 +39,146 @@
                 android:layout_height="3dp"
                 android:elevation="3dp"
                 android:background="@color/headerDivider"/>
-
-            <TextView
-                android:id="@+id/contact_titleName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/Name"
-                style="@android:style/TextAppearance.DeviceDefault.Large"
-                />
-
-            <EditText
-                android:id="@+id/contact_nameEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/Name"
-                android:inputType="textPersonName"
-                />
-
-            <TextView
-
-                android:id="@+id/contact_titleFirstName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/First_name"
-                style="@android:style/TextAppearance.DeviceDefault.Large"
-                />
-
-            <EditText
-                android:id="@+id/contact_firstNameEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/First_name"
-                android:inputType="textPersonName"
-                />
-
-            <TextView
-                android:id="@+id/contact_titleEmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/e_mail"
-                style="@android:style/TextAppearance.DeviceDefault.Large"
-                />
-
             <LinearLayout
-                android:orientation="horizontal"
+                android:id="@+id/contact_content"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/windowsMargins"
+                android:layout_marginLeft="@dimen/windowsMargins"
+                android:orientation="vertical"
+                >
 
 
 
-
-                <FrameLayout
-                    android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/contact_titleName"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    >
-
-                    <ImageView
-                        android:id="@+id/contact_invalid_mail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_highlight_off_black_24dp"
-                        android:tint="@color/redLock"
-                        android:visibility="gone"/>
-
-                    <ImageView
-                        android:id="@+id/contact_valid_mail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_check_black_24dp"
-                        android:tint="@color/greenLock"
-                        android:visibility="gone"/>
-
-
-                </FrameLayout>
+                    android:text="@string/Name"
+                    style="@android:style/TextAppearance.DeviceDefault.Large"
+                    />
 
                 <EditText
-                    android:id="@+id/contact_mailEditText"
-                    android:layout_width="0dp"
+                    android:id="@+id/contact_nameEditText"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:ems="10"
-                    android:hint="@string/mail_example"
-                    android:inputType="textEmailAddress"
-                    android:backgroundTint="@color/redLock"
-                    android:layout_weight="1" />
+                    android:hint="@string/Name"
+                    android:inputType="textPersonName"
+                    />
+
+                <TextView
+
+                    android:id="@+id/contact_titleFirstName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/First_name"
+                    style="@android:style/TextAppearance.DeviceDefault.Large"
+                    />
+
+                <EditText
+                    android:id="@+id/contact_firstNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/First_name"
+                    android:inputType="textPersonName"
+                    />
+
+                <TextView
+                    android:id="@+id/contact_titleEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/e_mail"
+                    style="@android:style/TextAppearance.DeviceDefault.Large"
+                    />
+
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        >
+
+                        <ImageView
+                            android:id="@+id/contact_invalid_mail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_highlight_off_black_24dp"
+                            android:tint="@color/redLock"
+                            android:visibility="gone"/>
+
+                        <ImageView
+                            android:id="@+id/contact_valid_mail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_check_black_24dp"
+                            android:tint="@color/greenLock"
+                            android:visibility="gone"/>
+
+
+                    </FrameLayout>
+
+                    <EditText
+                        android:id="@+id/contact_mailEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:hint="@string/mail_example"
+                        android:inputType="textEmailAddress"
+                        android:backgroundTint="@color/colorPrimary"
+                        android:layout_weight="1" />
+
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/contact_titleSpinnerNews"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Je souhaite être renseigné à propos de:"
+                    style="@android:style/TextAppearance.DeviceDefault.Large"
+                    />
+
+                <Spinner
+                    android:id="@+id/contact_spinner_news"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dialog"
+                    android:padding="@dimen/spinnerMargin"
+                    android:entries="@array/newsletter_option_news"
+                    />
+
+
+                <TextView
+                    android:id="@+id/contact_titleSpinnerFrom"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="J'étudie actuellement en:"
+                    style="@android:style/TextAppearance.DeviceDefault.Large"
+                    />
+                <Spinner
+                    android:id="@+id/contact_spinner_from"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dialog"
+                    android:padding="@dimen/spinnerMargin"
+                    android:entries="@array/newsletter_option_from"
+                    />
+
 
             </LinearLayout>
-
-
-            <TextView
-                android:id="@+id/contact_titleSpinnerNews"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Je souhaite être renseigné à propos de:"
-                style="@android:style/TextAppearance.DeviceDefault.Large"
-                />
-
-            <Spinner
-                android:id="@+id/contact_spinner_news"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dialog"
-                android:padding="@dimen/spinnerMargin"
-                android:entries="@array/newsletter_option_news"
-                />
-
-
-            <TextView
-                android:id="@+id/contact_titleSpinnerFrom"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="J'étudie actuellement en:"
-                style="@android:style/TextAppearance.DeviceDefault.Large"
-                />
-            <Spinner
-                android:id="@+id/contact_spinner_from"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:spinnerMode="dialog"
-                android:padding="@dimen/spinnerMargin"
-                android:entries="@array/newsletter_option_from"
-                />
-
-
         </LinearLayout>
+
+
+
 
     </android.support.v4.widget.NestedScrollView>
 
@@ -174,8 +187,8 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/floatingActionButton"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:layout_margin="@dimen/windowsMargins"
         android:clickable="true"
         android:src="@drawable/ic_check_black_24dp"

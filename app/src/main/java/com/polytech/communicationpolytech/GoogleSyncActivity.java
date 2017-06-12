@@ -10,22 +10,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,14 +27,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -59,7 +51,6 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -67,44 +58,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.zip.Inflater;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class ReservedSpaceActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
+public class GoogleSyncActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
 
-
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    private ViewPager mViewPager;
 
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private Button mCallApiButton;
-    private Button mDlApiButton;
-    private EditText mEditText;
     ProgressDialog mCheckForUpdatesProgress;
     ProgressDialog mDlProgress;
     AlertDialog mDownloadStartDialog;
     CoordinatorLayout mMainCoordinatorLayout;
     AlertDialog.Builder builder;
-    
-    static final int REQUEST_ACCOUNT_PICKER = 1000;
-    static final int REQUEST_AUTHORIZATION = 1001;
-    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
-    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    TextView mOutputText;
+    ListView listDownloadItem;
 
-    private static final String BUTTON_TEXT = "Call Drive API";
-    private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = { DriveScopes.DRIVE_READONLY };
 
-    private static final String APP_NAME="Communication Polytech App";
-
-    private static java.io.File sdRootFolder;
-
-    private java.io.File reservedFolder;
-
-    private List<File> files_list;
+    //############# DRIVE VARIABLES #################
 
     /**
      * Treemap ID drive, FileDrive
@@ -118,8 +90,215 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
      */
     private TreeMap<String,java.io.File> Storage_Treemap =new TreeMap<>();
 
+    private TreeMap<String,DownloadStateWrapper> ToDownloadFiles_Treemap= new TreeMap<>();
+
+    private static java.io.File sdRootFolder;
+
+
+    //################ STATICS #################
+
+    static final int REQUEST_ACCOUNT_PICKER = 1000;
+    static final int REQUEST_AUTHORIZATION = 1001;
+    static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
+    static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+
+    private static final String BUTTON_TEXT = "Call Drive API";
+    private static final String PREF_ACCOUNT_NAME = "accountName";
+    private static final String[] SCOPES = { DriveScopes.DRIVE_READONLY };
+
+    private static final String APP_NAME="Communication Polytech App";
+
+
+
+
+    //############################## APP LIFE Cycle ###############################
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_google_sync);
+
+        setTitle("Synchronisation des données");
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        sdRootFolder=getExternalFilesDir(null);
+
+        mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.googleSync_mainContent);
+
+        listDownloadItem=(ListView) findViewById(R.id.googleSync_list);
+
+        LinearLayout mCustomHeaders=new LinearLayout(this);
+        mCustomHeaders.setOrientation(LinearLayout.VERTICAL);
+
+        listDownloadItem.setTag(mCustomHeaders);
+        listDownloadItem.addHeaderView(mCustomHeaders);
+
+
+        Button searchMAJ=(Button) findViewById(R.id.googleSync_maj);
+        searchMAJ.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                syncWithGoogle();
+            }
+        });
+
+        Button dlSelected=(Button) findViewById(R.id.googleSync_downloadSelected);
+        dlSelected.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                downloadSelectedFiles();
+            }
+        });
+
+        mOutputText=new TextView(this);
+
+        setupGoogleCredentials();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.googleSync_menu_refresh:
+                syncWithGoogle();
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+
+        menuInflater.inflate(R.menu.google_sync_menu,menu);
+        return true;
+    }
+
+    /**
+     * Called when an activity launched here (specifically, AccountPicker
+     * and authorization) exits, giving you the requestCode you started it with,
+     * the resultCode it returned, and any additional data from it.
+     * @param requestCode code indicating which activity result is incoming.
+     * @param resultCode code indicating the result of the incoming
+     *     activity result.
+     * @param data Intent (containing result data) returned by incoming
+     *     activity result.
+     */
+    @Override
+    protected void onActivityResult(
+            int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case REQUEST_GOOGLE_PLAY_SERVICES:
+                if (resultCode != RESULT_OK) {
+                    mOutputText.setText(
+                            "This app requires Google Play Services. Please install " +
+                                    "Google Play Services on your device and relaunch this app.");
+                } else {
+                    getResultsFromApi();
+                }
+                break;
+            case REQUEST_ACCOUNT_PICKER:
+                if (resultCode == RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        SharedPreferences settings =
+                                getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.apply();
+                        mCredential.setSelectedAccountName(accountName);
+                        getResultsFromApi();
+                    }
+                }
+                break;
+            case REQUEST_AUTHORIZATION:
+                if (resultCode == RESULT_OK) {
+                    getResultsFromApi();
+                }
+                break;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(mDownloadStartDialog !=null) mDownloadStartDialog.dismiss();
+        if(mDlProgress!=null){
+            mDlProgress.cancel();
+            mDlProgress.dismiss();
+        }
+        if(mCheckForUpdatesProgress !=null) mCheckForUpdatesProgress.dismiss();
+    }
+
+    /**
+     * Respond to requests for permissions at runtime for API 23 and above.
+     * @param requestCode The request code passed in
+     *     requestPermissions(android.app.Activity, String, int, String[])
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions
+     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(
+                requestCode, permissions, grantResults, this);
+    }
+
+    /**
+     * Callback for when a permission is granted using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+    /**
+     * Callback for when a permission is denied using the EasyPermissions
+     * library.
+     * @param requestCode The request code associated with the requested
+     *         permission
+     * @param list The requested permission list. Never null.
+     */
+    @Override
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Do nothing.
+    }
+
+
+    //######################## METHODS DIVERS ###########################
+
+
+    private void showSnackBar(String message,int length){
+        Snackbar.make(mMainCoordinatorLayout,message,length).show();
+    }
+
+    private void showColoredSnackBar(int colorID,String message, int length){
+        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
+        snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
+        snack.show();
+    }
+
+
 
     //###################### DRIVE FILE SYNC METHODS ###########################
+
+
 
     /**
      * Recupere les ID des fichiers du DRIVE qui n'existent pas et qui ne sont pas des dossiers
@@ -310,10 +489,8 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
         //Regarder sur le Google Drive les fichiers à DL
         //Donc remplir les treemaps
-        //getResultsFromApi();
+        getResultsFromApi();
 
-        Intent startGoogleSyncActivity=new Intent(this,GoogleSyncActivity.class);
-        startActivity(startGoogleSyncActivity);
 
         //Ouvrir un popup avec le nb de fichiers à DL et si on veut DL
 
@@ -343,427 +520,72 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 .setBackOff(new ExponentialBackOff());
     }
 
-    //########################## APP LIFECYCLE ##########################
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_reserved_space);
-        setTitle(R.string.reserved_space);
+    private void fillToDownloadFilesListView(){
 
-        sdRootFolder=getExternalFilesDir(null);
+        //REMPLIR LA LISTVIEW AVEC LES ELEMENTS A TELECHARGER ET PRECOCHER CEUX QUI N'EXISTENT PAS
 
-        reservedFolder=new java.io.File(sdRootFolder.getAbsolutePath() + Constants.PATH_RESERVED);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        if(getSupportActionBar()!=null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if(Drive_Treemap !=null){
+            listDownloadItem.setAdapter(new DownloadFilesAdapter(this,R.layout.download_item,(LinearLayout)listDownloadItem.getTag(),Drive_Treemap,ToDownloadFiles_Treemap));
         }
-
-
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        mMainCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.reserved_activity_container);
-
-
-        setupGoogleCredentials();
-
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch (item.getItemId()){
-            case android.R.id.home:
-                finish();
-                return true;
-            case R.id.menu_google_sync:
-                syncWithGoogle();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        MenuInflater menuInflater=getMenuInflater();
-
-        menuInflater.inflate(R.menu.reserved_space_menu,menu);
-
-        return super.onCreateOptionsMenu(menu);
     }
 
 
     /**
-     * Called when an activity launched here (specifically, AccountPicker
-     * and authorization) exits, giving you the requestCode you started it with,
-     * the resultCode it returned, and any additional data from it.
-     * @param requestCode code indicating which activity result is incoming.
-     * @param resultCode code indicating the result of the incoming
-     *     activity result.
-     * @param data Intent (containing result data) returned by incoming
-     *     activity result.
+     * Vide la Treemap des fichiers à télécharger
+     * et la rempli la Treemap des fichiers à telecharger avec getFilesToDownload(false) et passe les elements qui sont dans getFilesToDownload(true) à true.
+     * TODO Peut être optimisée en réitérant sur la Treemap au lieu de demander 2 fois getFilestoDownload
      */
-    @Override
-    protected void onActivityResult(
-            int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case REQUEST_GOOGLE_PLAY_SERVICES:
-                if (resultCode != RESULT_OK) {
-                    mOutputText.setText(
-                            "This app requires Google Play Services. Please install " +
-                                    "Google Play Services on your device and relaunch this app.");
-                } else {
-                    getResultsFromApi();
-                }
-                break;
-            case REQUEST_ACCOUNT_PICKER:
-                if (resultCode == RESULT_OK && data != null &&
-                        data.getExtras() != null) {
-                    String accountName =
-                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                    if (accountName != null) {
-                        SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(PREF_ACCOUNT_NAME, accountName);
-                        editor.apply();
-                        mCredential.setSelectedAccountName(accountName);
-                        getResultsFromApi();
-                    }
-                }
-                break;
-            case REQUEST_AUTHORIZATION:
-                if (resultCode == RESULT_OK) {
-                    getResultsFromApi();
-                }
-                break;
-        }
-    }
+    private void initialiseDownloadTreemap(){
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(mDownloadStartDialog !=null) mDownloadStartDialog.dismiss();
-        if(mDlProgress!=null){
-            mDlProgress.cancel();
-            mDlProgress.dismiss();
-        }
-        if(mCheckForUpdatesProgress !=null) mCheckForUpdatesProgress.dismiss();
-    }
+        ToDownloadFiles_Treemap.clear();
 
-    /**
-     * Respond to requests for permissions at runtime for API 23 and above.
-     * @param requestCode The request code passed in
-     *     requestPermissions(android.app.Activity, String, int, String[])
-     * @param permissions The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *     which is either PERMISSION_GRANTED or PERMISSION_DENIED. Never null.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(
-                requestCode, permissions, grantResults, this);
-    }
-
-    /**
-     * Callback for when a permission is granted using the EasyPermissions
-     * library.
-     * @param requestCode The request code associated with the requested
-     *         permission
-     * @param list The requested permission list. Never null.
-     */
-    @Override
-    public void onPermissionsGranted(int requestCode, List<String> list) {
-        // Do nothing.
-    }
-
-    /**
-     * Callback for when a permission is denied using the EasyPermissions
-     * library.
-     * @param requestCode The request code associated with the requested
-     *         permission
-     * @param list The requested permission list. Never null.
-     */
-    @Override
-    public void onPermissionsDenied(int requestCode, List<String> list) {
-        // Do nothing.
-    }
-
-    //##################### METHODS BOUTONS #######################
+        List<String> downloadableFiles=getFilesToDownload(false);
+        List<String> nonExistantFiles=getFilesToDownload(true);
 
 
-    void onClickExportCsv(View v){
+        //Initialise toute la Treemap avec les fichiers dispo au telechargement
+        for(String ID : downloadableFiles){
+            //Création du wrapper avec exists=true par defaut
+            DownloadStateWrapper wrapper=new DownloadStateWrapper(true);
 
-        java.io.File csvFile=new java.io.File(sdRootFolder.getAbsolutePath() + "/formulaire.csv");
+            //Le fichier n'est pas a télécharger par defaut
+            wrapper.setToDownload(false);
 
-        //Le fichier csv existe
-        if(csvFile.exists()){
-
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-
-            sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + csvFile.getAbsolutePath()));
-            sendIntent.setType("text/csv");
-
-            startActivity(Intent.createChooser(sendIntent ,"Partager via:"));
-        }else{
-            showSnackBar("Aucun formulaire à exporter.", Snackbar.LENGTH_LONG);
+            ToDownloadFiles_Treemap.put(ID,wrapper);
         }
 
+        //Remplace les false de certains ID par true si ils sont dans nonExistantFiles
+        for(String ID: nonExistantFiles){
 
-    }
 
-    private void showSnackBar(String message,int length){
-        Snackbar.make(mMainCoordinatorLayout,message,length).show();
-    }
-
-    private void showColoredSnackBar(int colorID,String message, int length){
-        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
-        snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
-        snack.show();
-    }
-
-    private void showSnackBar(int stringid, int length){
-        Snackbar.make(mMainCoordinatorLayout, stringid,length).show();
-    }
-
-    private void consultCSVData(){
-        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
-
-        if(csvFile.exists()){
-
-            //TreeMap<String,CSVformatter.CSVEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
-            Intent startCSV=new Intent(this,CSVConsultActivity.class);
-            startActivity(startCSV);
-
+            DownloadStateWrapper wrapper=ToDownloadFiles_Treemap.get(ID);
+            wrapper.alreadyExists=false;
+            wrapper.toDownload=true;
         }
-        else{
-            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
-        }
+
     }
 
-    private void deleteCSVData(){
-        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
 
-        if(csvFile.exists()){
+    private void downloadSelectedFiles(){
 
-            //TreeMap<String,CSVformatter.CSVEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
+        ArrayList <String> toDlFiles=new ArrayList<>();
 
 
-            if(csvFile.delete()){
-                showColoredSnackBar(R.color.greenLock,"Données de contact effacées.",Snackbar.LENGTH_LONG);
-            }else{
-                showColoredSnackBar(R.color.redLock,"Échec de l'effacement des données de contact.",Snackbar.LENGTH_LONG);
+        for(String ID : ToDownloadFiles_Treemap.keySet()){
+            DownloadStateWrapper wrapper=ToDownloadFiles_Treemap.get(ID);
+
+            if(wrapper.isToDownload()){
+                toDlFiles.add(ID);
             }
         }
-        else{
-            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
-        }
+
+        new DLfileTask(mCredential).execute(toDlFiles.toArray(new String[]{}));
     }
 
-    //############################ CLASSES VIEWPAGER FRAGMENT ####################
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            // Return a ConfigFragment (defined as a static inner class below).
-
-            if(position==0){
-                return ConfigFragment.newInstance(position + 1,ReservedSpaceActivity.this);
-            }
-
-            return RecyclerViewFileFragment.newInstance(position+1,reservedFolder);
-        }
-
-        @Override
-        public int getCount() {
-            // Show 3 total pages.
-            return 2;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Configuration";
-                case 1:
-                    return "Documents Réservés";
-
-            }
-            return null;
-        }
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class ConfigFragment extends Fragment {
-
-        TextView mOutputText;
-        Button mCallApiButton;
-        Button mDlApiButton;
-        Button mClearStorageButton;
-        Button mShareCSVButton;
-        Button mClearCSVButton;
-        Button mConsultCSVButton;
-
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        private ReservedSpaceActivity parentActivity;
-
-        public ReservedSpaceActivity getParentActivity() {
-            return parentActivity;
-        }
-
-        public void setParentActivity(ReservedSpaceActivity parentActivity) {
-            this.parentActivity = parentActivity;
-        }
-
-        public ConfigFragment() {
-        }
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static ConfigFragment newInstance(int sectionNumber,ReservedSpaceActivity parentActivity) {
-            ConfigFragment fragment = new ConfigFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            fragment.setParentActivity(parentActivity);
-            fragment.setRetainInstance(true);
-            return fragment;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-
-
-
-            View rootView = inflater.inflate(R.layout.fragment_reserved_config, container, false);
-
-            mOutputText=(TextView) rootView.findViewById(R.id.reserved_output_textview);
-            //mCallApiButton=(Button) rootView.findViewById(R.id.reserved_callapi);
-            //mDlApiButton=(Button) rootView.findViewById(R.id.reserved_download);
-            mClearStorageButton=(Button) rootView.findViewById(R.id.reserved_reset_storage);
-            mShareCSVButton = (Button) rootView.findViewById(R.id.reserved_export_csv);
-            mClearCSVButton = (Button) rootView.findViewById(R.id.reserved_reset_csv);
-            mConsultCSVButton=(Button) rootView.findViewById(R.id.reserved_view_csv);
-
-            mShareCSVButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    parentActivity.onClickExportCsv(v);
-                }
-            });
-
-            mClearCSVButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    parentActivity.deleteCSVData();
-                }
-            });
-
-            mConsultCSVButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    parentActivity.consultCSVData();
-                }
-            });
-
-
-            /*
-            mCallApiButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    parentActivity.mCallApiButton.setEnabled(false);
-                    parentActivity.mOutputText.setText("");
-                    parentActivity.getResultsFromApi();
-                    parentActivity.mCallApiButton.setEnabled(true);
-                }
-            });
-
-            mDlApiButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(parentActivity.files_list!=null){
-                        //File f=files_list.get(Integer.parseInt(mEditText.getText().toString()));
-
-
-                        String[] ids={parentActivity.files_list.get(0).getId(),parentActivity.files_list.get(1).getId(),parentActivity.files_list.get(3).getId(),parentActivity.files_list.get(4).getId()};
-
-                        //File[] files= {f};
-
-
-
-                        if(ids!=null){
-                            //Toast.makeText(MainActivity.this,f.getName(),Toast.LENGTH_LONG)
-                            //        .show();
-                            Toast.makeText(parentActivity,"Demarrage telechargement",Toast.LENGTH_LONG)
-                                    .show();
-
-                            parentActivity.new DLfileTask(parentActivity.mCredential)
-                                    .execute(ids);
-                        }
-                    }
-                    else{
-                        Toast.makeText(parentActivity,"Pas de files recup",Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            */
-
-            parentActivity.mOutputText=mOutputText;
-            //parentActivity.mDlApiButton=mDlApiButton;
-            //parentActivity.mCallApiButton=mCallApiButton;
-
-            return rootView;
-        }
-
-
-
-        @Override
-        public void onStop() {
-            super.onStop();
-        }
-
-
-    }
 
     //############################# HANDLING GOOGLE API #####################################
+
+
 
     /**
      * Attempt to call the API, after verifying that all the preconditions are
@@ -779,7 +601,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             chooseAccount();
         } else if (! isDeviceOnline()) {
             mOutputText.setText("No network connection available.");
-            showSnackBar("No network connection available.",Snackbar.LENGTH_LONG);
+            showSnackBar("No network connection available.", Snackbar.LENGTH_LONG);
         } else {
             new MakeRequestTask(mCredential).execute();
         }
@@ -871,7 +693,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             final int connectionStatusCode) {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         Dialog dialog = apiAvailability.getErrorDialog(
-                ReservedSpaceActivity.this,
+                GoogleSyncActivity.this,
                 connectionStatusCode,
                 REQUEST_GOOGLE_PLAY_SERVICES);
         dialog.show();
@@ -898,7 +720,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
         final ListView selectFilesList=(ListView) dialogView.findViewById(R.id.downloaddialog_selectFiles);
 
-        //TODO selectFilesList.setAdapter(new DownloadFilesAdapter(this,R.layout.download_item,Drive_Treemap,DLableFiles,addToDownloadFiles));
+        //selectFilesList.setAdapter(new DownloadFilesAdapter(this,R.layout.download_item,Drive_Treemap,DLableFiles,addToDownloadFiles));
 
         builder.setView(dialogView);
         builder.setCancelable(true);
@@ -960,7 +782,7 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             @Override
             public void onShow(DialogInterface dialog) {
                 final Button neutral=((AlertDialog) dialog).getButton(DialogInterface.BUTTON_NEUTRAL);
-                neutral.setTextColor(ContextCompat.getColor(ReservedSpaceActivity.this,R.color.redLock));
+                neutral.setTextColor(ContextCompat.getColor(GoogleSyncActivity.this,R.color.redLock));
 
                 advancedOptions.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -1259,7 +1081,9 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
                 //Ajouter les fichiers à la Treemap
 
                 List<File> files = result.getFiles();
-                files_list=files;
+
+                //files_list=files;
+
                 if (files != null) {
                     for (File file : files) {
 
@@ -1278,6 +1102,8 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
 
 
             fillStorageMapFromDriveMap(mService);
+
+            initialiseDownloadTreemap();
 
             /*
             //Get files which doesn't exist currently
@@ -1344,7 +1170,9 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
             dialog.show(getSupportFragmentManager(),"DialogConfirmDownload");
             */
 
-            askDownloadDialog();
+            //askDownloadDialog();
+
+            fillToDownloadFilesListView();
 
 
             if (output == null || output.size() == 0) {
@@ -1384,7 +1212,29 @@ public class ReservedSpaceActivity extends AppCompatActivity implements EasyPerm
         }
     }
 
+    //########################### CLASS #####################
 
+    public static class DownloadStateWrapper{
+        private boolean alreadyExists;
+        private boolean toDownload;
+
+        public DownloadStateWrapper(boolean alreadyExists) {
+            this.alreadyExists = alreadyExists;
+        }
+
+        public boolean alreadyExists() {
+            return alreadyExists;
+        }
+
+
+        public boolean isToDownload() {
+            return toDownload;
+        }
+
+        public void setToDownload(boolean toDownload) {
+            this.toDownload = toDownload;
+        }
+    }
 
 
 }

@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.TreeMap;
 
 
@@ -28,6 +29,14 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
     Context mContext;
     TreeMap<String,CSVformatter.CSVEntry> entryTreeMap;
     ArrayList<String> keys;
+    OnMapUpdateListener mMapListener;
+
+
+    public static interface OnMapUpdateListener{
+        void OnMapUpdate(TreeMap<String,CSVformatter.CSVEntry> map);
+    }
+
+
 
     @Nullable
     @Override
@@ -36,11 +45,12 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
     }
 
 
-    public CSVEntryArrayAdapter(@NonNull Context context, @LayoutRes int resource, TreeMap<String,CSVformatter.CSVEntry> entryTreeMap) {
+    public CSVEntryArrayAdapter(@NonNull Context context, @LayoutRes int resource, TreeMap<String,CSVformatter.CSVEntry> entryTreeMap, OnMapUpdateListener mMapListener) {
         super(context, resource);
         layoutid=resource;
         mContext=context;
         this.entryTreeMap=entryTreeMap;
+        this.mMapListener=mMapListener;
         setValues();
     }
 
@@ -97,5 +107,16 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
     @Override
     public int getCount() {
         return keys.size();
+    }
+
+    @Override
+    public void add(@Nullable CSVformatter.CSVEntry object) {
+        super.add(object);
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        mMapListener.OnMapUpdate(entryTreeMap);
     }
 }
