@@ -178,7 +178,7 @@ public class CSVformatter {
             String[] lineValues=new String[headerGoogle.length];
             Arrays.fill(lineValues,"");
 
-            //Remplir tout les header nécessaires
+            //Remplir tout les headerContainer nécessaires
             for(int i=0;i<headerGoogleIndex.length;i++){
 
                 //Creation du champ NAME
@@ -201,11 +201,11 @@ public class CSVformatter {
 
         else if(formatType==FORMAT_OUTLOOK){
 
-            //Creates all the strings to store in the header.
+            //Creates all the strings to store in the headerContainer.
             String[] lineValues=new String[headerOutlook.length];
             Arrays.fill(lineValues,"");
 
-            //Remplir tout les header nécessaires
+            //Remplir tout les headerContainer nécessaires
             for(int i=0;i<headerOutlookIndex.length;i++){
 
                 int toStoreIndex=headerOutlookIndex[i];
@@ -219,11 +219,11 @@ public class CSVformatter {
         }
         else if(formatType==FORMAT_CUSTOM){
 
-            //Creates all the strings to store in the header.
+            //Creates all the strings to store in the headerContainer.
             String[] lineValues=new String[headerCustom.length];
             Arrays.fill(lineValues,"");
 
-            //Remplir tout les header nécessaires
+            //Remplir tout les headerContainer nécessaires
             for(int i=0;i<headerCustomIndex.length;i++){
 
                 int toStoreIndex=headerCustomIndex[i];

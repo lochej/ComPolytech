@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#10000000"
+    android:id="@+id/csv_list_contentView_header">
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Trier par:"
+        android:layout_margin="8dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:textColor="@android:color/black"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+
+    <Spinner
+        android:id="@+id/csv_list_sortspinner"
+        android:entries="@array/sort_entries"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginStart="@dimen/windowsMargins"
+        android:layout_marginEnd="8dp"
+        android:textColor="@android:color/black"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:text="Nombre d'entrées:"/>
+
+    <TextView
+        android:id="@+id/csv_list_nbentries_header"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@android:color/black"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_height="wrap_content"
+        />
+
+</LinearLayout>

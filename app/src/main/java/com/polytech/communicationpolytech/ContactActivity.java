@@ -128,9 +128,9 @@ public class ContactActivity extends AppCompatActivity {
 
     public void OnConfirmForm(View v){
 
-        String nom=this.nom.getText().toString();
-        String prenom=this.prenom.getText().toString();
-        String mail=this.mail.getText().toString();
+        String nom=this.nom.getText().toString().trim();
+        String prenom=this.prenom.getText().toString().trim();
+        String mail=this.mail.getText().toString().trim();
         String study=((TextView)this.study.getSelectedView()).getText().toString();
         String newsletter=((TextView)this.newsletter.getSelectedView()).getText().toString();
 

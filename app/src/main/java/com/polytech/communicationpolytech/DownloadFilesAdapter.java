@@ -17,6 +17,8 @@ import android.widget.ListView;
 import com.google.api.services.drive.model.File;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.TreeMap;
 
 
@@ -41,6 +43,33 @@ public class DownloadFilesAdapter extends ArrayAdapter {
         setHeader();
     }
 
+    Comparator<GoogleSyncActivity.DownloadStateWrapper> stateWrapperComparator=new Comparator<GoogleSyncActivity.DownloadStateWrapper>() {
+        @Override
+        public int compare(GoogleSyncActivity.DownloadStateWrapper o1, GoogleSyncActivity.DownloadStateWrapper o2) {
+            boolean isToDl1=o1.isToDownload();
+            boolean isToDl2=o2.isToDownload();
+
+            if(isToDl1 && isToDl2){
+                return 0;
+            }
+
+            if(isToDl1){
+                return -1;
+            }
+            if(isToDl2){
+                return 1;
+            }
+            return 0;
+        }
+    };
+
+    Comparator<String> upToDl=new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+
+            return stateWrapperComparator.compare(toDownloadFiles.get(o1),toDownloadFiles.get(o2));
+        }
+    };
 
     private void setHeader(){
 
@@ -88,6 +117,7 @@ public class DownloadFilesAdapter extends ArrayAdapter {
 
     private void setupValues(){
         values=new ArrayList<>(toDownloadFiles.keySet());
+        Collections.sort(values,upToDl);
     }
 
     @NonNull

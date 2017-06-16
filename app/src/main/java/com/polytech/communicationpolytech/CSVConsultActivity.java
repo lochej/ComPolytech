@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -51,6 +52,9 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
         csvFile=new File(getExternalFilesDir(null),Constants.CSV_FILENAME);
 
         listView=(ListView) findViewById(R.id.csvviewer_listview);
+        LinearLayout header=new LinearLayout(listView.getContext());
+        listView.setTag(header);
+        listView.addHeaderView(header);
 
 
         if(savedInstanceState !=null){
@@ -168,7 +172,7 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
     }
 
     private void setMapAdapter(){
-        listView.setAdapter(new CSVEntryArrayAdapter(this,R.layout.csv_entry_item,map,this));
+        listView.setAdapter(new CSVEntryArrayAdapter(this,R.layout.csv_entry_item,(LinearLayout)listView.getTag(),map,this));
     }
 
     private void showSnackBar(String message,int length){
