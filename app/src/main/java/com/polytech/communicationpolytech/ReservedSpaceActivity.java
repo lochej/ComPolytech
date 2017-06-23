@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -39,6 +40,7 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -210,7 +212,7 @@ public class ReservedSpaceActivity extends AppCompatActivity{
 
         if(csvFile.exists()){
 
-            //TreeMap<String,CSVformatter.CSVEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
+            //TreeMap<String,CSVformatter.CSVFormEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
             Intent startCSV=new Intent(this,CSVConsultActivity.class);
             startActivity(startCSV);
 
@@ -225,7 +227,7 @@ public class ReservedSpaceActivity extends AppCompatActivity{
 
         if(csvFile.exists()){
 
-            //TreeMap<String,CSVformatter.CSVEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
+            //TreeMap<String,CSVformatter.CSVFormEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
 
 
             if(csvFile.delete()){
@@ -369,6 +371,34 @@ public class ReservedSpaceActivity extends AppCompatActivity{
 
                     Intent startGoogleSyncActivity=new Intent(v.getContext(),GoogleSyncActivity.class);
                     startActivity(startGoogleSyncActivity);
+                }
+            });
+
+            mClearStorageButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+
+
+                    final Intent i = new Intent();
+                    i.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    i.addCategory(Intent.CATEGORY_DEFAULT);
+                    i.setData(Uri.parse("package:" + v.getContext().getPackageName()));
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    i.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    v.getContext().startActivity(i);
+
+
+                    for(int j=0;j<2;j++)
+
+                    Toast.makeText(v.getContext(),"Cliquez sur STOCKAGE" +
+                            "\n" +
+                            "EFFACER LES DONNÉES " +
+                            "et \n" +
+                            "VIDER LE CACHE" +
+                            "\n" +
+                            " pour effacer toutes les données de l'application",Toast.LENGTH_LONG).show();
                 }
             });
 

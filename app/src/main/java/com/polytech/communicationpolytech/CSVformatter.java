@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Formatter;
+import java.util.List;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -117,14 +117,14 @@ public class CSVformatter {
         fos.close();
     }
 
-    public static void writeLineDataToFile(File intoFile,CSVEntry entry,int formatType) throws IOException {
+    public static void writeLineDataToFile(File intoFile, CSVFormEntry entry, int formatType) throws IOException {
         writeLineDataToFile(intoFile,entry.toArray(),formatType);
     }
 
-    public static TreeMap<String,CSVEntry> extractTreemap(File fromFile) throws FileNotFoundException {
+    public static TreeMap<String,CSVFormEntry> extractTreemap(File fromFile) throws FileNotFoundException {
         Scanner sc=new Scanner(fromFile);
 
-        TreeMap<String,CSVEntry> out=extractTreemap(sc);
+        TreeMap<String,CSVFormEntry> out=extractTreemap(sc);
 
         sc.close();
 
@@ -132,11 +132,11 @@ public class CSVformatter {
         return  out;
     }
 
-    public static TreeMap<String,CSVEntry> extractTreemap(Scanner sc){
+    public static TreeMap<String,CSVFormEntry> extractTreemap(Scanner sc){
         int counter=0;
         int formatType=-1;
 
-        TreeMap<String,CSVEntry> out=new TreeMap<>();
+        TreeMap<String,CSVFormEntry> out=new TreeMap<>();
         while(sc.hasNextLine()){
 
             String line=sc.nextLine();
@@ -159,7 +159,7 @@ public class CSVformatter {
 
             }
             else{
-                CSVEntry entry=CSVEntry.fromCSVLine(line,formatType);
+                CSVFormEntry entry= CSVFormEntry.fromCSVLine(line,formatType);
                 if(entry!=null){
                     out.put(entry.getMail(),entry);
                 }
@@ -283,7 +283,7 @@ public class CSVformatter {
      * @param intoFile
      * @param entries
      */
-    public static void writeTreemapToFile(File intoFile,TreeMap<String,CSVEntry> entries, int formatType) throws IOException {
+    public static void writeTreemapToFile(File intoFile, TreeMap<String,CSVFormEntry> entries, int formatType) throws IOException {
 
         writeHeaderToOutputStream(intoFile,formatType);
 
@@ -294,13 +294,13 @@ public class CSVformatter {
     }
 
 
-    public static class CSVEntry{
+    public static class CSVFormEntry {
 
-        String nom="";
-        String prenom="";
-        String news="";
-        String study="";
-        String mail="";
+        private String nom="";
+        private String prenom="";
+        private String news="";
+        private String study="";
+        private String mail="";
 
         public String getMail() {
             return mail;
@@ -310,11 +310,11 @@ public class CSVformatter {
             this.mail = mail;
         }
 
-        public CSVEntry(String mail) {
+        public CSVFormEntry(String mail) {
             this.mail = mail;
         }
 
-        public CSVEntry(String nom, String prenom, String news, String study, String mail) {
+        public CSVFormEntry(String nom, String prenom, String news, String study, String mail) {
             this.nom = nom;
             this.prenom = prenom;
             this.news = news;
@@ -354,7 +354,7 @@ public class CSVformatter {
             this.study = study;
         }
 
-        public static CSVEntry fromCSVLine(String line, int format){
+        public static CSVFormEntry fromCSVLine(String line, int format){
             String[] fields=line.split(Pattern.quote(columnSeparator));
 
             int[] headerindexes=null;
@@ -377,7 +377,7 @@ public class CSVformatter {
                     return null;
             }
 
-            CSVEntry entry=new CSVEntry(fields[headerindexes[2]]);
+            CSVFormEntry entry=new CSVFormEntry(fields[headerindexes[2]]);
 
             entry.setNom(fields[headerindexes[0]]);
             entry.setPrenom(fields[headerindexes[1]]);
@@ -395,12 +395,64 @@ public class CSVformatter {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof CSVEntry && obj.toString().equals(this.toString());
+            return obj instanceof CSVFormEntry && obj.toString().equals(this.toString());
         }
 
         public String[] toArray(){
             return new String[]{nom,prenom,mail,study,news};
         }
     }
+
+
+
+
+    public static class CSVQuizzEntry implements Serializable{
+
+        private String question;
+        private List<String> answers;
+        private String validAnswer;
+
+        private String explaination;
+
+        public CSVQuizzEntry(String question, List<String> answers, String validAnswer) {
+            this.question = question;
+            this.answers = answers;
+            this.validAnswer = validAnswer;
+        }
+
+        public String getQuestion() {
+            return question;
+        }
+
+        public void setQuestion(String question) {
+            this.question = question;
+        }
+
+        public List<String> getAnswers() {
+            return answers;
+        }
+
+        public void setAnswers(List<String> answers) {
+            this.answers = answers;
+        }
+
+        public String getValidAnswer() {
+            return validAnswer;
+        }
+
+        public void setValidAnswer(String validAnswer) {
+            this.validAnswer = validAnswer;
+        }
+
+        public String getExplaination() {
+            return explaination;
+        }
+
+        public void setExplaination(String explaination) {
+            this.explaination = explaination;
+        }
+    }
+
+
 
 }

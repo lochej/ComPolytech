@@ -128,11 +128,13 @@ public class HomeItem {
         quizz.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent startReseauActivity=new Intent(v.getContext(),ReseauActivity.class);
+                Intent startReseauActivity=new Intent(v.getContext(),QuizzActivity.class);
                 v.getContext().startActivity(startReseauActivity);
             }
         });
         dataList.add(quizz);
+
+
 
         return dataList;
     }

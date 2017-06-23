@@ -14,6 +14,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        android:largeHeap="true"
         android:windowSoftInputMode="adjustResize">
         <activity
             android:name=".SplashActivity"
@@ -51,7 +52,8 @@
             android:label="@string/title_activity_polytech2"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".CSVConsultActivity" />
-        <activity android:name=".GoogleSyncActivity"></activity>
+        <activity android:name=".GoogleSyncActivity" />
+        <activity android:name=".QuizzActivity"></activity>
     </application>
 
 </manifest>

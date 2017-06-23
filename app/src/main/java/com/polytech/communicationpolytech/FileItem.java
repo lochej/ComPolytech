@@ -17,8 +17,6 @@ import java.io.Serializable;
 
 public class FileItem implements Parcelable {
 
-    String title;
-    int iconID;
     File file;
     //View.OnClickListener listener;
     Bitmap thumbnailImage;
@@ -40,28 +38,31 @@ public class FileItem implements Parcelable {
         this.thumbnailImage = thumbnailImage;
     }
 
-    public FileItem(String title, int iconID, File file) {
-        this.title = title;
-        this.iconID = iconID;
+    public FileItem(int type, File file) {
+        this.type=type;
         this.file = file;
 
     }
 
     public String getTitle() {
-        return title;
+        return file.getName();
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     public int getIconID() {
-        return iconID;
+
+        switch(type){
+            case Constants.TYPE_VIDEO:
+            return R.drawable.ic_video_library_black_24dp;
+            case Constants.TYPE_IMAGE:
+                return R.drawable.ic_image_black_24dp;
+            case Constants.TYPE_PDF:
+                return R.drawable.ic_picture_as_pdf_black_24dp;
+        }
+
+        return 0;
     }
 
-    public void setIconID(int iconID) {
-        this.iconID = iconID;
-    }
 
     public File getFile() {
         return file;
@@ -88,8 +89,6 @@ public class FileItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(title);
-        dest.writeInt(iconID);
         dest.writeSerializable(file);
         dest.writeInt(type);
         if(thumbnailImage!=null){
@@ -111,8 +110,6 @@ public class FileItem implements Parcelable {
     };
 
     private FileItem(Parcel in) {
-        title = in.readString();
-        iconID = in.readInt();
         file=(File) in.readSerializable();
         type=in.readInt();
         thumbnailImage=Bitmap.CREATOR.createFromParcel(in);

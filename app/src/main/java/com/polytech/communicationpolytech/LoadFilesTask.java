@@ -133,8 +133,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
 
         //Ajouter un séparateur
         if(!isRoot && (foundFiles.length > 0)){
-            FileItem test = new FileItem(rootFolder.getName(), 0, null);
-            test.setType(Constants.TYPE_SEPARATOR);
+            FileItem test = new FileItem(Constants.TYPE_SEPARATOR,rootFolder);
             fileitems.add(test);
         }
 
@@ -151,8 +150,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                 case Constants.TYPE_IMAGE:
 
                     itemtoAdd = new FileItem(
-                            fileToAdd.getName(),
-                            R.drawable.ic_image_black_24dp,
+                            Constants.TYPE_IMAGE,
                             fileToAdd);
                     /*
                     itemtoAdd.setListener(new View.OnClickListener() {
@@ -167,8 +165,6 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                     });
                     */
 
-                    itemtoAdd.setType(Constants.TYPE_IMAGE);
-
                     fileitems.add(itemtoAdd);
 
                     break;
@@ -176,8 +172,7 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                 case Constants.TYPE_PDF:
 
                     itemtoAdd = new FileItem(
-                            fileToAdd.getName(),
-                            R.drawable.ic_picture_as_pdf_black_24dp,
+                            Constants.TYPE_PDF,
                             fileToAdd);
 
                     /*
@@ -195,20 +190,15 @@ public class LoadFilesTask extends AsyncTask<File,Void,List<FileItem>> {
                     });
                     */
 
-                    itemtoAdd.setType(Constants.TYPE_PDF);
-
                     fileitems.add(itemtoAdd);
 
                     break;
                 case Constants.TYPE_VIDEO:
 
                     itemtoAdd = new FileItem(
-                            fileToAdd.getName(),
-                            R.drawable.ic_video_library_black_24dp,
+                            Constants.TYPE_VIDEO,
                             fileToAdd);
 
-
-                    itemtoAdd.setType(Constants.TYPE_VIDEO);
 
                     fileitems.add(itemtoAdd);
 

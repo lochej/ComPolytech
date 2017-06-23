@@ -1,6 +1,5 @@
 package com.polytech.communicationpolytech;
 
-import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.design.widget.CoordinatorLayout;
@@ -10,8 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -20,10 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.api.client.util.StringUtils;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.TreeMap;
 
@@ -141,7 +135,7 @@ public class ContactActivity extends AppCompatActivity {
             snack.show();
 
 
-            CSVformatter.CSVEntry entry=new CSVformatter.CSVEntry(nom,prenom,newsletter,study,mail);
+            CSVformatter.CSVFormEntry entry=new CSVformatter.CSVFormEntry(nom,prenom,newsletter,study,mail);
 
 
             try {
@@ -207,7 +201,7 @@ public class ContactActivity extends AppCompatActivity {
         }
         else{
 
-            TreeMap<String,CSVformatter.CSVEntry> entries=CSVformatter.extractTreemap(csvFile);
+            TreeMap<String,CSVformatter.CSVFormEntry> entries=CSVformatter.extractTreemap(csvFile);
 
 
             CSVformatter.writeLineDataToFile(csvFile,line,format);
@@ -217,7 +211,7 @@ public class ContactActivity extends AppCompatActivity {
 
     }
 
-    public void saveCSVFile(File csvFile, boolean append, CSVformatter.CSVEntry entry) throws IOException {
+    public void saveCSVFile(File csvFile, boolean append, CSVformatter.CSVFormEntry entry) throws IOException {
 
 
 
@@ -234,7 +228,7 @@ public class ContactActivity extends AppCompatActivity {
         }
         else{
 
-            TreeMap<String,CSVformatter.CSVEntry> entries=CSVformatter.extractTreemap(csvFile);
+            TreeMap<String,CSVformatter.CSVFormEntry> entries=CSVformatter.extractTreemap(csvFile);
 
 
             if(entry.equals(entries.get(entry.getMail()))){

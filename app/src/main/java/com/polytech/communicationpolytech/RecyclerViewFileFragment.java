@@ -58,7 +58,7 @@ public class RecyclerViewFileFragment extends Fragment {
                 case LOADING:
                     break;
                 case SUCCESS_LOADING:
-                    data=(ArrayList<FileItem>)msg.obj;
+                    //L'objet data est déjà plein.
                     installDataToRecyclerView();
                     refreshLayout.setRefreshing(false);
 
@@ -67,7 +67,6 @@ public class RecyclerViewFileFragment extends Fragment {
 
                     placeholder.setVisibility(View.VISIBLE);
                     refreshLayout.setRefreshing(false);
-
                     break;
             }
 
@@ -76,12 +75,6 @@ public class RecyclerViewFileFragment extends Fragment {
         }
     });
 
-
-    /**
-     * The fragment argument representing the section number for this
-     * fragment.
-     */
-    private static final String ARG_SECTION_NUMBER = "section_number";
 
     private static final String ARG_FILE="file_java_io";
 
@@ -96,7 +89,6 @@ public class RecyclerViewFileFragment extends Fragment {
         RecyclerViewFileFragment fragment = new RecyclerViewFileFragment();
         Bundle args = new Bundle();
         //Save infos about the fragment
-        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         args.putSerializable(ARG_FILE,rootFile);
         fragment.setArguments(args);
         return fragment;
@@ -151,6 +143,7 @@ public class RecyclerViewFileFragment extends Fragment {
             @Override
             public void onRefresh() {
                 //refreshLayout.setRefreshing(false);
+                data=null;
                 loadFiles(true);
             }
         });
@@ -294,7 +287,10 @@ public class RecyclerViewFileFragment extends Fragment {
 
                 fillFileItemListFromFolder(fileitems,externalDir,true);
 
-                mHandler.obtainMessage(SUCCESS_LOADING,fileitems).sendToTarget();
+
+                data=fileitems;
+
+                mHandler.obtainMessage(SUCCESS_LOADING).sendToTarget();
 
 
                 //setAdapter(recyclerView,fileitems);

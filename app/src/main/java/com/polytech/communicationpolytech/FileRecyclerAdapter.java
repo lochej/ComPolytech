@@ -325,15 +325,9 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         private TextView title;
         //private TextView placeholder;
         private ImageView imgThumb,imgIcon;
-        private VideoView videoView;
         private FileItem currentItem;
         private View itemView;
-        private MediaController mediaController;
-        private ImageButton fullscreen;
         private FloatingActionButton playFab;
-        private MediaPlayer mediaPlayer;
-        private TextureView textureView;
-        private TextureVideoView textureVideoView;
         private TextView placeholder;
         private LoadVideoThumbTask videoThumbTask;
         Context context;
@@ -848,8 +842,6 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         double resizefactor=6.0;
 
-        int minimum_height=300;
-        int minimum_width=300;
 
         long time_now= System.currentTimeMillis();
 

@@ -12,13 +12,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TreeMap;
 
 public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArrayAdapter.OnMapUpdateListener {
@@ -27,7 +24,7 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
     static final String KEY_LAST_SIZE="lastSize";
 
 
-    TreeMap<String,CSVformatter.CSVEntry> map;
+    TreeMap<String,CSVformatter.CSVFormEntry> map;
     File csvFile;
     CoordinatorLayout content;
     ListView listView;
@@ -58,7 +55,7 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
 
 
         if(savedInstanceState !=null){
-            map=(TreeMap<String,CSVformatter.CSVEntry>) savedInstanceState.getSerializable(KEY_MAP);
+            map=(TreeMap<String,CSVformatter.CSVFormEntry>) savedInstanceState.getSerializable(KEY_MAP);
             lastSize=savedInstanceState.getInt(KEY_LAST_SIZE);
             if(map !=null){
                 setMapAdapter();
@@ -78,8 +75,8 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
     }
 
     @Override
-    public void OnMapUpdate(TreeMap<String, CSVformatter.CSVEntry> map) {
-        setTitle(title + ": " + map.size() + " " +(map.size() <= 1 ? "entrée" : "entrées") );
+    public void OnMapUpdate(TreeMap<String, CSVformatter.CSVFormEntry> map) {
+        //setTitle(title + ": " + map.size() + " " +(map.size() <= 1 ? "entrée" : "entrées") );
     }
 
     @Override

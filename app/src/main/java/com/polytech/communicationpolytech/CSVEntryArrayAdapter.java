@@ -26,13 +26,13 @@ import java.util.TreeMap;
  * Created by jeloc on 06/06/2017.
  */
 
-public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
+public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry> {
 
     int layoutid;
     Context mContext;
-    TreeMap<String,CSVformatter.CSVEntry> entryTreeMap;
+    TreeMap<String,CSVformatter.CSVFormEntry> entryTreeMap;
     ArrayList<String> keys;
-    ArrayList<CSVformatter.CSVEntry> values;
+    ArrayList<CSVformatter.CSVFormEntry> values;
     OnMapUpdateListener mMapListener;
     LinearLayout headerContainer;
     TextView entryCount;
@@ -45,54 +45,95 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
 
     int CURRENT_SORTING=SORT_NOM;
 
+    String NOT_GIVEN;
+
+
     public static interface OnMapUpdateListener{
-        void OnMapUpdate(TreeMap<String,CSVformatter.CSVEntry> map);
+        void OnMapUpdate(TreeMap<String,CSVformatter.CSVFormEntry> map);
     }
 
 
-    Comparator<CSVformatter.CSVEntry> sortByNom=new Comparator<CSVformatter.CSVEntry>() {
+    Comparator<CSVformatter.CSVFormEntry> sortByNom=new Comparator<CSVformatter.CSVFormEntry>() {
         @Override
-        public int compare(CSVformatter.CSVEntry o1, CSVformatter.CSVEntry o2) {
+        public int compare(CSVformatter.CSVFormEntry o1, CSVformatter.CSVFormEntry o2) {
+
+            if(o1.getNom().length()==0){
+                return 1;
+            }
+
+            if(o2.getNom().length()==0){
+                return -1;
+            }
+
             return o1.getNom().compareTo(o2.getNom());
         }
     };
 
-    Comparator<CSVformatter.CSVEntry> sortByPrenom=new Comparator<CSVformatter.CSVEntry>() {
+    Comparator<CSVformatter.CSVFormEntry> sortByPrenom=new Comparator<CSVformatter.CSVFormEntry>() {
         @Override
-        public int compare(CSVformatter.CSVEntry o1, CSVformatter.CSVEntry o2) {
+        public int compare(CSVformatter.CSVFormEntry o1, CSVformatter.CSVFormEntry o2) {
+
+            if(o1.getPrenom().length()==0){
+                return 1;
+            }
+
+            if(o2.getPrenom().length()==0){
+                return -1;
+            }
+
+
             return o1.getPrenom().compareTo(o2.getPrenom());
         }
     };
 
-    Comparator<CSVformatter.CSVEntry> sortByEmail=new Comparator<CSVformatter.CSVEntry>() {
+    Comparator<CSVformatter.CSVFormEntry> sortByEmail=new Comparator<CSVformatter.CSVFormEntry>() {
         @Override
-        public int compare(CSVformatter.CSVEntry o1, CSVformatter.CSVEntry o2) {
+        public int compare(CSVformatter.CSVFormEntry o1, CSVformatter.CSVFormEntry o2) {
             return o1.getMail().compareTo(o2.getMail());
         }
     };
 
-    Comparator<CSVformatter.CSVEntry> sortByNews=new Comparator<CSVformatter.CSVEntry>() {
+    Comparator<CSVformatter.CSVFormEntry> sortByNews=new Comparator<CSVformatter.CSVFormEntry>() {
         @Override
-        public int compare(CSVformatter.CSVEntry o1, CSVformatter.CSVEntry o2) {
+        public int compare(CSVformatter.CSVFormEntry o1, CSVformatter.CSVFormEntry o2) {
+
+            if(o1.getStudy().equals(NOT_GIVEN)){
+                return 1;
+            }
+
+            if(o2.getStudy().equals(NOT_GIVEN)){
+                return -1;
+            }
+
             return o1.getNews().compareTo(o2.getNews());
         }
     };
 
-    Comparator<CSVformatter.CSVEntry> sortByStudy=new Comparator<CSVformatter.CSVEntry>() {
+    Comparator<CSVformatter.CSVFormEntry> sortByStudy=new Comparator<CSVformatter.CSVFormEntry>() {
         @Override
-        public int compare(CSVformatter.CSVEntry o1, CSVformatter.CSVEntry o2) {
+        public int compare(CSVformatter.CSVFormEntry o1, CSVformatter.CSVFormEntry o2) {
+
+
+            if(o1.getStudy().equals(NOT_GIVEN)){
+                return 1;
+            }
+
+            if(o2.getStudy().equals(NOT_GIVEN)){
+                return -1;
+            }
+
             return o1.getStudy().compareTo(o2.getStudy());
         }
     };
 
     @Nullable
     @Override
-    public CSVformatter.CSVEntry getItem(int position) {
+    public CSVformatter.CSVFormEntry getItem(int position) {
         return values.get(position);
     }
 
 
-    public CSVEntryArrayAdapter(@NonNull Context context, @LayoutRes int resource, LinearLayout headerContainer,TreeMap<String, CSVformatter.CSVEntry> entryTreeMap, OnMapUpdateListener mMapListener) {
+    public CSVEntryArrayAdapter(@NonNull Context context, @LayoutRes int resource, LinearLayout headerContainer, TreeMap<String, CSVformatter.CSVFormEntry> entryTreeMap, OnMapUpdateListener mMapListener) {
         super(context, resource);
         layoutid=resource;
         mContext=context;
@@ -101,6 +142,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
         this.headerContainer =headerContainer;
         addHeaderView();
         setValues();
+        NOT_GIVEN=context.getResources().getStringArray(R.array.newsletter_option_from)[0];
     }
 
 
@@ -144,7 +186,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
 
         final View view=convertView;
 
-        final CSVformatter.CSVEntry entry=values.get(position);
+        final CSVformatter.CSVFormEntry entry=values.get(position);
 
         //TextView nom=(TextView) view.findViewById(R.id.csv_nom);
         //TextView prenom=(TextView) view.findViewById(R.id.csv_prenom);
@@ -172,7 +214,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
 
 
 
-        if(newsStr.equals("Non renseigné") || newsStr.length() ==0){
+        if(newsStr.equals(NOT_GIVEN) || newsStr.length() ==0){
             news.setTextColor(ContextCompat.getColor(view.getContext(),R.color.lite_lite_gray));
             news.setText(newsStr);
         }
@@ -181,7 +223,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
             news.setText(newsStr);
         }
 
-        if(studyStr.equals("Non renseigné") || studyStr.length()==0){
+        if(studyStr.equals(NOT_GIVEN) || studyStr.length()==0){
             study.setTextColor(ContextCompat.getColor(view.getContext(),R.color.lite_lite_gray));
             study.setText(studyStr);
         }
@@ -217,7 +259,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
     }
 
     @Override
-    public void remove(@Nullable CSVformatter.CSVEntry object) {
+    public void remove(@Nullable CSVformatter.CSVFormEntry object) {
         entryTreeMap.remove(object.getMail());
         setValues();
     }
@@ -258,7 +300,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVEntry> {
     }
 
     @Override
-    public void add(@Nullable CSVformatter.CSVEntry object) {
+    public void add(@Nullable CSVformatter.CSVFormEntry object) {
         super.add(object);
     }
 

@@ -1,8 +1,11 @@
 package com.polytech.communicationpolytech;
 
+import android.app.Dialog;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -17,11 +20,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 public class CandidatActivity extends AppCompatActivity {
 
@@ -93,6 +101,57 @@ public class CandidatActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
+        showDirectingDialog();
+    }
+
+    private void showDirectingDialog(){
+        final AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        LinearLayout buttonContainer=(LinearLayout) this.getLayoutInflater().inflate(R.layout.dialog_directing,null);
+        builder.setView(buttonContainer);
+        builder.setTitle("Qui êtes-vous ?");
+        builder.setMessage("Vous êtes candidat dans une formation de Polytech Tours ?" +
+                "\n" +
+                "Sélectionné pour quel niveau d'études pour souhaitez intégré Polytech Tours:");
+        builder.setNegativeButton("Ignorer",null);
+
+
+        final Dialog dialog=builder.create();
+
+
+        if(sectionFolders!=null){
+
+
+            for(int i=0;i<sectionFolders.length;i++){
+
+                Button b=(Button) this.getLayoutInflater().inflate(R.layout.flat_text_button,null);
+
+                final int index=i;
+
+                b.setWidth(MATCH_PARENT);
+                b.setHeight(WRAP_CONTENT);
+
+
+                b.setText(sectionFolders[i].getName());
+                b.setTextColor(ContextCompat.getColor(this,R.color.colorAccent));
+
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mViewPager.setCurrentItem(index,true);
+                        dialog.dismiss();
+                    }
+                });
+
+                buttonContainer.addView(b);
+
+            }
+
+        }
+
+        dialog.show();
+
+
     }
 
     @Override
@@ -160,20 +219,6 @@ public class CandidatActivity extends AppCompatActivity {
 
             return dirToLoad==null ? "": dirToLoad.getName();
 
-            /*
-            switch (position) {
-                case 0:
-                    return "L'école";
-                case 1:
-                    return "Les formations";
-                case 2:
-                    return "Projets étudiants";
-                case 3:
-                    return "Vie étudiante";
-
-            }
-            return null;
-            */
         }
     }
 }
