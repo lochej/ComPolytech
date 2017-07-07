@@ -33,4 +33,17 @@
         <item>Etudes</item>
         <item>Abonnement</item>
     </string-array>
+
+    <array name="header_bg_colors">
+        <item>@color/brown</item>
+        <item>@color/deep_orange</item>
+        <item>@color/blue</item>
+        <item>@color/bluegray</item>
+        <item>@color/teal</item>
+        <item>@color/deep_purple</item>
+        <item>@color/green</item>
+        <item>@color/pink</item>
+        <item>@color/indigo</item>
+        <item>@color/light_green</item>
+    </array>
 </resources>

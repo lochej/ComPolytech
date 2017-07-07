@@ -1,19 +1,10 @@
 package com.polytech.communicationpolytech;
 
-import android.Manifest;
-import android.accounts.AccountManager;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
@@ -26,52 +17,14 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.googleapis.media.MediaHttpDownloader;
-import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.ExponentialBackOff;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.DriveScopes;
-import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.FileList;
-
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
-
-import pub.devrel.easypermissions.AfterPermissionGranted;
-import pub.devrel.easypermissions.EasyPermissions;
-
-public class ReservedSpaceActivity extends AppCompatActivity{
+public class ReservedSpaceActivity extends AppCompatActivity {
 
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -88,19 +41,17 @@ public class ReservedSpaceActivity extends AppCompatActivity{
     private java.io.File reservedFolder;
 
 
-
     /**
      * Va contacter le Google Drive si possible où emmettre des popup.
      * Scan le google drive, donne le nombre de fichiers telechargeable et demander à l'utilisateur s'il veut telecharger
-     *
      */
-    private void syncWithGoogle(){
+    private void syncWithGoogle() {
 
         //Regarder sur le Google Drive les fichiers à DL
         //Donc remplir les treemaps
         //getResultsFromApi();
 
-        Intent startGoogleSyncActivity=new Intent(this,GoogleSyncActivity.class);
+        Intent startGoogleSyncActivity = new Intent(this, GoogleSyncActivity.class);
         startActivity(startGoogleSyncActivity);
 
         //Ouvrir un popup avec le nb de fichiers à DL et si on veut DL
@@ -116,14 +67,14 @@ public class ReservedSpaceActivity extends AppCompatActivity{
         setContentView(R.layout.activity_reserved_space);
         setTitle(R.string.reserved_space);
 
-        sdRootFolder=getExternalFilesDir(null);
+        sdRootFolder = getExternalFilesDir(null);
 
-        reservedFolder=new java.io.File(sdRootFolder.getAbsolutePath() + Constants.PATH_RESERVED);
+        reservedFolder = new java.io.File(sdRootFolder.getAbsolutePath() + Constants.PATH_RESERVED);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(getSupportActionBar()!=null){
+        if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
@@ -147,7 +98,7 @@ public class ReservedSpaceActivity extends AppCompatActivity{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 return true;
@@ -160,24 +111,24 @@ public class ReservedSpaceActivity extends AppCompatActivity{
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mDownloadStartDialog !=null) mDownloadStartDialog.dismiss();
-        if(mDlProgress!=null){
+        if (mDownloadStartDialog != null) mDownloadStartDialog.dismiss();
+        if (mDlProgress != null) {
             mDlProgress.cancel();
             mDlProgress.dismiss();
         }
-        if(mCheckForUpdatesProgress !=null) mCheckForUpdatesProgress.dismiss();
+        if (mCheckForUpdatesProgress != null) mCheckForUpdatesProgress.dismiss();
     }
 
 
     //##################### METHODS BOUTONS #######################
 
 
-    void onClickExportCsv(View v){
+    void onClickExportCsv(View v) {
 
-        java.io.File csvFile=new java.io.File(sdRootFolder.getAbsolutePath() + "/formulaire.csv");
+        java.io.File csvFile = new java.io.File(sdRootFolder.getAbsolutePath() + "/formulaire.csv");
 
         //Le fichier csv existe
-        if(csvFile.exists()){
+        if (csvFile.exists()) {
 
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
@@ -185,59 +136,78 @@ public class ReservedSpaceActivity extends AppCompatActivity{
             sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + csvFile.getAbsolutePath()));
             sendIntent.setType("text/csv");
 
-            startActivity(Intent.createChooser(sendIntent ,"Partager via:"));
-        }else{
+            startActivity(Intent.createChooser(sendIntent, "Partager via:"));
+        } else {
             showSnackBar("Aucun formulaire à exporter.", Snackbar.LENGTH_LONG);
         }
 
 
     }
 
-    private void showSnackBar(String message,int length){
-        Snackbar.make(mMainCoordinatorLayout,message,length).show();
+    private void showSnackBar(String message, int length) {
+        Snackbar.make(mMainCoordinatorLayout, message, length).show();
     }
 
-    private void showColoredSnackBar(int colorID,String message, int length){
-        Snackbar snack=Snackbar.make(mMainCoordinatorLayout,message,length);
-        snack.getView().setBackgroundColor(ContextCompat.getColor(this,colorID));
+    private void showColoredSnackBar(int colorID, String message, int length) {
+        Snackbar snack = Snackbar.make(mMainCoordinatorLayout, message, length);
+        snack.getView().setBackgroundColor(ContextCompat.getColor(this, colorID));
         snack.show();
     }
 
-    private void showSnackBar(int stringid, int length){
-        Snackbar.make(mMainCoordinatorLayout, stringid,length).show();
+    private void showSnackBar(int stringid, int length) {
+        Snackbar.make(mMainCoordinatorLayout, stringid, length).show();
     }
 
-    private void consultCSVData(){
-        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
+    private void consultCSVData() {
+        java.io.File csvFile = new java.io.File(getExternalFilesDir(null).getAbsolutePath(), Constants.CSV_FORMULAIRE);
 
-        if(csvFile.exists()){
+        if (csvFile.exists()) {
 
-            //TreeMap<String,CSVformatter.CSVFormEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
-            Intent startCSV=new Intent(this,CSVConsultActivity.class);
+            //TreeMap<String,CSVformatter.CSVFormEntry> entryTreemap=CSVformatter.extractTreeMap(csvFile);
+            Intent startCSV = new Intent(this, CSVConsultActivity.class);
             startActivity(startCSV);
 
-        }
-        else{
-            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
+        } else {
+            showSnackBar("Données de contact inexistante: rien à effacer.", Snackbar.LENGTH_LONG);
         }
     }
 
-    private void deleteCSVData(){
-        java.io.File csvFile=new java.io.File(getExternalFilesDir(null).getAbsolutePath(),Constants.CSV_FILENAME);
+    private void deleteCSVData() {
+        final java.io.File csvFile = new java.io.File(getExternalFilesDir(null).getAbsolutePath(), Constants.CSV_FORMULAIRE);
 
-        if(csvFile.exists()){
+        if (csvFile.exists()) {
 
-            //TreeMap<String,CSVformatter.CSVFormEntry> entryTreemap=CSVformatter.extractTreemap(csvFile);
+            //TreeMap<String,CSVformatter.CSVFormEntry> entryTreemap=CSVformatter.extractTreeMap(csvFile);
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+
+                            if (csvFile.delete()) {
+                                showColoredSnackBar(R.color.greenLock, "Données de contact effacées.", Snackbar.LENGTH_LONG);
+                            } else {
+                                showColoredSnackBar(R.color.redLock, "Échec de l'effacement des données de contact.", Snackbar.LENGTH_LONG);
+                            }
+                            dialog.dismiss();
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            dialog.dismiss();
+                            break;
+
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Êtes vous sur de vouloir supprimer les données de contact ?").setPositiveButton("Oui", dialogClickListener)
+                    .setNegativeButton("Non", dialogClickListener).show();
 
 
-            if(csvFile.delete()){
-                showColoredSnackBar(R.color.greenLock,"Données de contact effacées.",Snackbar.LENGTH_LONG);
-            }else{
-                showColoredSnackBar(R.color.redLock,"Échec de l'effacement des données de contact.",Snackbar.LENGTH_LONG);
-            }
-        }
-        else{
-            showSnackBar("Données de contact inexistante: rien à effacer.",Snackbar.LENGTH_LONG);
+
+        } else {
+            showSnackBar("Données de contact inexistante: rien à effacer.", Snackbar.LENGTH_LONG);
         }
     }
 
@@ -258,11 +228,11 @@ public class ReservedSpaceActivity extends AppCompatActivity{
             // getItem is called to instantiate the fragment for the given page.
             // Return a ConfigFragment (defined as a static inner class below).
 
-            if(position==0){
-                return ConfigFragment.newInstance(position + 1,ReservedSpaceActivity.this);
+            if (position == 0) {
+                return ConfigFragment.newInstance(position + 1, ReservedSpaceActivity.this);
             }
 
-            return RecyclerViewFileFragment.newInstance(position+1,reservedFolder);
+            return RecyclerViewFileFragment.newInstance(position + 1, reservedFolder);
         }
 
         @Override
@@ -319,7 +289,7 @@ public class ReservedSpaceActivity extends AppCompatActivity{
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static ConfigFragment newInstance(int sectionNumber,ReservedSpaceActivity parentActivity) {
+        public static ConfigFragment newInstance(int sectionNumber, ReservedSpaceActivity parentActivity) {
             ConfigFragment fragment = new ConfigFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
@@ -334,14 +304,13 @@ public class ReservedSpaceActivity extends AppCompatActivity{
                                  Bundle savedInstanceState) {
 
 
-
             View rootView = inflater.inflate(R.layout.fragment_reserved_config, container, false);
 
-            mDlActivity =(Button) rootView.findViewById(R.id.reserved_googleSyncActivity);
-            mClearStorageButton=(Button) rootView.findViewById(R.id.reserved_reset_storage);
+            mDlActivity = (Button) rootView.findViewById(R.id.reserved_googleSyncActivity);
+            mClearStorageButton = (Button) rootView.findViewById(R.id.reserved_reset_storage);
             mShareCSVButton = (Button) rootView.findViewById(R.id.reserved_export_csv);
             mClearCSVButton = (Button) rootView.findViewById(R.id.reserved_reset_csv);
-            mConsultCSVButton=(Button) rootView.findViewById(R.id.reserved_view_csv);
+            mConsultCSVButton = (Button) rootView.findViewById(R.id.reserved_view_csv);
 
             mShareCSVButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -369,7 +338,7 @@ public class ReservedSpaceActivity extends AppCompatActivity{
                 @Override
                 public void onClick(View v) {
 
-                    Intent startGoogleSyncActivity=new Intent(v.getContext(),GoogleSyncActivity.class);
+                    Intent startGoogleSyncActivity = new Intent(v.getContext(), GoogleSyncActivity.class);
                     startActivity(startGoogleSyncActivity);
                 }
             });
@@ -377,7 +346,6 @@ public class ReservedSpaceActivity extends AppCompatActivity{
             mClearStorageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
 
 
                     final Intent i = new Intent();
@@ -390,22 +358,21 @@ public class ReservedSpaceActivity extends AppCompatActivity{
                     v.getContext().startActivity(i);
 
 
-                    for(int j=0;j<2;j++)
+                    for (int j = 0; j < 2; j++)
 
-                    Toast.makeText(v.getContext(),"Cliquez sur STOCKAGE" +
-                            "\n" +
-                            "EFFACER LES DONNÉES " +
-                            "et \n" +
-                            "VIDER LE CACHE" +
-                            "\n" +
-                            " pour effacer toutes les données de l'application",Toast.LENGTH_LONG).show();
+                        Toast.makeText(v.getContext(), "Cliquez sur STOCKAGE" +
+                                "\n" +
+                                "EFFACER LES DONNÉES " +
+                                "et \n" +
+                                "VIDER LE CACHE" +
+                                "\n" +
+                                " pour effacer toutes les données de l'application", Toast.LENGTH_LONG).show();
                 }
             });
 
 
             return rootView;
         }
-
 
 
         @Override
@@ -415,8 +382,6 @@ public class ReservedSpaceActivity extends AppCompatActivity{
 
 
     }
-
-
 
 
 }

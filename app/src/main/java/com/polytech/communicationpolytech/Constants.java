@@ -40,7 +40,8 @@ interface Constants {
     String PATH_RESERVED="/Application Communication/Espace reserve";
     String PATH_RESEAU="/Application Communication/Reseau Polytech";
 
-    String CSV_FILENAME="formulaire.csv";
+    String CSV_FORMULAIRE ="formulaire.csv";
+    String CSV_QUIZZ ="quizz.csv";
 
     Comparator<File> alphaComp=new Comparator<File>() {
         @Override

@@ -46,7 +46,7 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
 
         content=(CoordinatorLayout) findViewById(R.id.csvviewer_content);
 
-        csvFile=new File(getExternalFilesDir(null),Constants.CSV_FILENAME);
+        csvFile=new File(getExternalFilesDir(null),Constants.CSV_FORMULAIRE);
 
         listView=(ListView) findViewById(R.id.csvviewer_listview);
         LinearLayout header=new LinearLayout(listView.getContext());
@@ -163,7 +163,7 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
     }
 
     private void loadMap() throws FileNotFoundException {
-        map=CSVformatter.extractTreemap(csvFile);
+        map=CSVformatter.extractTreeMap(csvFile);
         setMapAdapter();
         lastSize=map.size();
     }

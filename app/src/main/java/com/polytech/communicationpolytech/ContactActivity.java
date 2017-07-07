@@ -189,7 +189,7 @@ public class ContactActivity extends AppCompatActivity {
 
         File externalDir=getExternalFilesDir(null);
 
-        File csvFile=new File(externalDir.getAbsolutePath(),Constants.CSV_FILENAME);
+        File csvFile=new File(externalDir.getAbsolutePath(),Constants.CSV_FORMULAIRE);
 
         int format=CSVformatter.FORMAT_CUSTOM;
 
@@ -201,7 +201,7 @@ public class ContactActivity extends AppCompatActivity {
         }
         else{
 
-            TreeMap<String,CSVformatter.CSVFormEntry> entries=CSVformatter.extractTreemap(csvFile);
+            TreeMap<String,CSVformatter.CSVFormEntry> entries=CSVformatter.extractTreeMap(csvFile);
 
 
             CSVformatter.writeLineDataToFile(csvFile,line,format);
@@ -228,7 +228,7 @@ public class ContactActivity extends AppCompatActivity {
         }
         else{
 
-            TreeMap<String,CSVformatter.CSVFormEntry> entries=CSVformatter.extractTreemap(csvFile);
+            TreeMap<String,CSVformatter.CSVFormEntry> entries=CSVformatter.extractTreeMap(csvFile);
 
 
             if(entry.equals(entries.get(entry.getMail()))){

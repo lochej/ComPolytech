@@ -133,11 +133,11 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
     }
 
 
-    public CSVEntryArrayAdapter(@NonNull Context context, @LayoutRes int resource, LinearLayout headerContainer, TreeMap<String, CSVformatter.CSVFormEntry> entryTreeMap, OnMapUpdateListener mMapListener) {
+    public CSVEntryArrayAdapter(@NonNull Context context, @LayoutRes int resource, LinearLayout headerContainer, TreeMap<String, CSVformatter.CSVFormEntry> entryHashMap, OnMapUpdateListener mMapListener) {
         super(context, resource);
         layoutid=resource;
         mContext=context;
-        this.entryTreeMap=entryTreeMap;
+        this.entryTreeMap =entryHashMap;
         this.mMapListener=mMapListener;
         this.headerContainer =headerContainer;
         addHeaderView();
@@ -309,7 +309,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
         super.notifyDataSetChanged();
         mMapListener.OnMapUpdate(entryTreeMap);
         if(entryCount !=null){
-            entryCount.setText(""+entryTreeMap.size());
+            entryCount.setText(""+ entryTreeMap.size());
         }
     }
 }

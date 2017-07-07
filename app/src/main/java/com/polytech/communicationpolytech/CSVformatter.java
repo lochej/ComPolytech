@@ -8,7 +8,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -27,6 +29,8 @@ public class CSVformatter {
 
     public static final String[] headerCustom = {"Nom","Prénom","Adresse E-mail","Études en cours","Recontacter à propos de"};
 
+    public static final String[] headerQuizz= {"Question","Explication","Reponse 1 vraie","Reponse 2 fausse", "Reponse 3 fausse","Reponse 4 fausse","Reponse 5 fausse"};
+
     //Nom Prénom,Prénom,Nom de famille,Email
     public static final int[] headerGoogleIndex={0,1,3,27};
 
@@ -35,6 +39,9 @@ public class CSVformatter {
 
     //Nom, Prenom, Email, Etudes en cours, Recontacter à propos
     public static final int[] headerCustomIndex={0,1,2,3,4};
+
+    //Question,Explication,Reponse 1 vraie,Reponse 2 fausse,Reponse 3 fausse, Reponse 4 fausse, Reponse 5 fausse
+    public static final int[] headerQuizzIndex={0,1,2,3,4,5,6};
 
     public static final String formatOutlook=getFormatString(headerOutlook);
 
@@ -55,6 +62,22 @@ public class CSVformatter {
     public static final int INDEX_OUTLOOK_LAST_NAME=headerOutlookIndex[1];
 
     public static final int INDEX_OUTLOOK_EMAIL=headerOutlookIndex[2];
+
+    public static final int INDEX_QUESTION_QUIZZ=headerQuizzIndex[0];
+
+    public static final int INDEX_EXPLANATION_QUIZZ=headerQuizzIndex[1];
+
+    public static final int INDEX_R1_QUIZZ=headerQuizzIndex[2];
+
+    public static final int INDEX_R2_QUIZZ=headerQuizzIndex[3];
+
+    public static final int INDEX_R3_QUIZZ=headerQuizzIndex[4];
+
+    public static final int INDEX_R4_QUIZZ=headerQuizzIndex[5];
+
+    public static final int INDEX_R5_QUIZZ=headerQuizzIndex[6];
+
+
 
     public static final int FORMAT_GOOGLE=0;
 
@@ -121,10 +144,10 @@ public class CSVformatter {
         writeLineDataToFile(intoFile,entry.toArray(),formatType);
     }
 
-    public static TreeMap<String,CSVFormEntry> extractTreemap(File fromFile) throws FileNotFoundException {
+    public static TreeMap<String,CSVFormEntry> extractTreeMap(File fromFile) throws FileNotFoundException {
         Scanner sc=new Scanner(fromFile);
 
-        TreeMap<String,CSVFormEntry> out=extractTreemap(sc);
+        TreeMap<String,CSVFormEntry> out= extractTreeMap(sc);
 
         sc.close();
 
@@ -132,7 +155,7 @@ public class CSVformatter {
         return  out;
     }
 
-    public static TreeMap<String,CSVFormEntry> extractTreemap(Scanner sc){
+    public static TreeMap<String,CSVFormEntry> extractTreeMap(Scanner sc){
         int counter=0;
         int formatType=-1;
 
@@ -170,6 +193,54 @@ public class CSVformatter {
         }
         return out;
     }
+
+
+    public static List<CSVQuizzEntry> extractQuizzFromCSV(File file) throws FileNotFoundException {
+        Scanner sc=new Scanner(file);
+
+        List<CSVQuizzEntry> out=extractQuizzFromCSV(sc);
+
+        sc.close();
+
+
+        return out;
+    }
+
+    public static List<CSVQuizzEntry> extractQuizzFromCSV(Scanner sc){
+        int counter=0;
+        int formatType=-1;
+
+        ArrayList<CSVQuizzEntry> out=new ArrayList<>();
+
+        while(sc.hasNextLine()){
+
+            String line=sc.nextLine();
+
+            //Verification des headers pour determiner le format
+            if(counter == 0 ){
+                String[] headers=line.split(Pattern.quote(columnSeparator));
+
+                if(Arrays.equals(headers,headerQuizz)){
+                    formatType=FORMAT_GOOGLE;
+                }
+                else{
+                    //return null;
+                }
+            }
+            else{
+                CSVQuizzEntry entry= CSVQuizzEntry.fromCSVLine(line,formatType);
+                if(entry!=null){
+                    out.add(entry);
+                }
+            }
+
+
+            counter++;
+        }
+        return out;
+    }
+
+
 
     public static String getStringFromData(String[] data,int formatType){
 
@@ -411,8 +482,9 @@ public class CSVformatter {
         private String question;
         private List<String> answers;
         private String validAnswer;
+        private String explanation;
 
-        private String explaination;
+        boolean valid=false;
 
         public CSVQuizzEntry(String question, List<String> answers, String validAnswer) {
             this.question = question;
@@ -444,14 +516,63 @@ public class CSVformatter {
             this.validAnswer = validAnswer;
         }
 
-        public String getExplaination() {
-            return explaination;
+        public int getValidAnswerIndex(){
+            return answers.indexOf(validAnswer);
         }
 
-        public void setExplaination(String explaination) {
-            this.explaination = explaination;
+
+        public String getExplanation() {
+            return explanation;
         }
+
+        public void setExplanation(String explanation) {
+            this.explanation = explanation;
+        }
+
+
+        public void setValid(boolean valid){
+            this.valid=valid;
+        }
+
+        public boolean isValid(){
+            return valid;
+        }
+
+        public static CSVQuizzEntry fromCSVLine(String line, int format){
+            String[] fields=line.split(Pattern.quote(columnSeparator));
+
+
+            String question=fields[0];
+            String explanation=fields[1];
+            String validAnswer=fields[2];
+
+            //System.out.println(question+explanation+validAnswer);
+
+
+            ArrayList<String> answers=new ArrayList<>();
+
+
+            for(int i=2;i<fields.length;i++){
+                //Si la case est vide on ne l'ajoute pas
+                if(!fields[i].equals("")){
+                    answers.add(fields[i]);
+                }
+
+            }
+
+            Collections.shuffle(answers);
+
+
+            CSVQuizzEntry entry=new CSVQuizzEntry(question,answers,validAnswer);
+
+            entry.setExplanation(explanation);
+
+            return entry;
+
+        }
+
     }
+
 
 
 

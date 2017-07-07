@@ -6,58 +6,254 @@
     android:layout_height="match_parent"
     tools:context="com.polytech.communicationpolytech.QuizzActivity">
 
-    <RelativeLayout
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/quizz_placeholder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Pas de Quizz disponible pour le moment."
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@android:color/black" />
+
+    <FrameLayout
+        android:id="@+id/quizz_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/quizz_logo"
+            android:layout_width="300dp"
+            android:layout_height="230dp"
+            android:layout_gravity="end|bottom"
+            android:scaleType="centerCrop"
+            android:src="@drawable/bulle" />
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="230dp"
+            android:layout_gravity="end|bottom"
+            android:scaleType="centerCrop"
+            android:src="@drawable/polyquizz" />
 
         <LinearLayout
-            android:id="@+id/footer"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:elevation="6dp"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/gray" />
-
-            <ProgressBar
-                android:id="@+id/quizz_footer_progressbar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
 
             <LinearLayout
+                android:id="@+id/quizz_header"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-
-                <TextView
-                    android:id="@+id/quizz_footer_question_number"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Numéro question: 1/10" />
-
+                android:layout_height="wrap_content"
+                android:background="@color/teal"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/quizz_footer_score"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/quizz_item_question_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="170dp"
+                    android:gravity="center"
+                    android:shadowColor="@color/cardview_shadow_start_color"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    android:text="Question"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/quizz_question_number"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Score: 8/10" />
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    android:text="Numéro question: 1/10"
+                    android:textAlignment="center"
+                    android:textColor="@color/colorAccent" />
+
+                <ProgressBar
+                    android:id="@+id/quizz_progressbar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="false" />
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/quizz_answers_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/windowsMargins"
+                        android:layout_marginTop="@dimen/windowsMargins"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/quizz_item_answer_hint"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="Réponses:"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                            android:textColor="@android:color/black" />
+
+                        <TextView
+                            android:id="@+id/quizz_item_explaination"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Explaination"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                            android:textColor="@color/greenLock" />
+
+                    </LinearLayout>
+
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/quizz_item_valid_fab"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:clickable="true"
+                        app:borderWidth="0dp"
+                        app:fabSize="normal"
+                        app:srcCompat="@drawable/ic_check_black_24dp"
+                        app:useCompatPadding="true" />
+
+                </LinearLayout>
+
+
+                <android.support.v4.widget.NestedScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <RadioGroup
+                        android:id="@+id/quizz_item_selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingBottom="@dimen/windowsMargins"
+                        android:paddingEnd="@dimen/windowsMargins"
+                        android:paddingStart="@dimen/windowsMargins" />
+
+                </android.support.v4.widget.NestedScrollView>
+
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/quizz_viewPager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/footer" />
 
-    </RelativeLayout>
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="70dp"
+            android:layout_gravity="start|top"
+            android:scaleType="centerCrop"
+            android:src="@drawable/quizz2" />
+
+
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/quizz_result_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/quizz_image_trophey"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/quizz_score"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="10 / 10"
+                android:textAlignment="center"
+                android:textColor="@color/red"
+                android:textSize="80sp"
+                android:typeface="serif" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Félicitations !"
+                android:textAlignment="center"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textColor="@color/colorAccent" />
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+
+    <!--<LinearLayout-->
+    <!--android:weightSum="100"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:orientation="vertical">-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/quizz_item_question_title"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:background="@color/colorPrimary"-->
+    <!--android:text="Question"-->
+    <!--android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"-->
+    <!--android:layout_weight="20" />-->
+
+    <!--<RadioGroup-->
+    <!--android:id="@+id/quizz_item_selector"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:layout_weight="70">-->
+    <!--</RadioGroup>-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/quizz_item_explaination"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:text="Explaination"-->
+    <!--android:textColor="@color/greenLock"-->
+    <!--android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"-->
+    <!--android:layout_weight="10" />-->
+
+    <!--</LinearLayout>-->
+
+
+    <!--<android.support.v4.view.ViewPager-->
+    <!--android:id="@+id/quizz_viewPager"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_above="@id/footer" />-->
 
 
 </android.support.design.widget.CoordinatorLayout>
