@@ -23,6 +23,8 @@ public class CSVConsultActivity extends AppCompatActivity implements CSVEntryArr
     static final String KEY_MAP="mapKey";
     static final String KEY_LAST_SIZE="lastSize";
 
+    static final String TAG="CSVActivity";
+
 
     TreeMap<String,CSVformatter.CSVFormEntry> map;
     File csvFile;
