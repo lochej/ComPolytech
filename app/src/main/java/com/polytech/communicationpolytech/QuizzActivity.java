@@ -414,7 +414,7 @@ public class QuizzActivity extends AppCompatActivity {
         if(points <= questionCounts*0.30f){
             quizzResultHint.setText(R.string.fourth_quizz_hint);
             quizzResultText.setText(R.string.fourth_quizz_result);
-            Glide.with(this).load(R.drawable.bronze_medal).into(quizzResultImage);
+            Glide.with(this).load(R.drawable.paper_medal).into(quizzResultImage);
 
         }
         //Plus de 3 points
