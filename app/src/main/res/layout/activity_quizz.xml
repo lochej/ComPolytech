@@ -20,6 +20,7 @@
         android:textColor="@android:color/black" />
 
     <FrameLayout
+        android:visibility="visible"
         android:id="@+id/quizz_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -177,39 +178,101 @@
         android:id="@+id/quizz_result_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
+        <!--<ImageView-->
+        <!--android:scaleType="centerCrop"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:src="@drawable/img_quizz"/>-->
 
-        <LinearLayout
+        <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <ImageView
-                android:id="@+id/quizz_image_trophey"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:layout_gravity="center_horizontal" />
-
-            <TextView
-                android:id="@+id/quizz_score"
+            <LinearLayout
+                android:layout_margin="@dimen/windowsMargins"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="10 / 10"
-                android:textAlignment="center"
-                android:textColor="@color/red"
-                android:textSize="80sp"
-                android:typeface="serif" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Félicitations !"
-                android:textAlignment="center"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="@color/colorAccent" />
+                <ImageView
+                    android:id="@+id/quizz_image_trophey"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:layout_gravity="center_horizontal" />
 
-        </LinearLayout>
+                <FrameLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+                    <TextView
+                        android:id="@+id/quizz_score"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="10 / 10"
+                        android:textAlignment="center"
+                        android:textColor="@color/red"
+                        android:textSize="80sp"
+                        android:typeface="serif" />
+
+                    <android.support.design.widget.FloatingActionButton
+                        android:id="@+id/quizz_quit_fab"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical|end"
+                        app:layout_anchorGravity="center_vertical|end"
+                        android:clickable="true"
+                        android:src="@drawable/ic_arrow_forward_black_24dp"
+                        app:fabSize="normal"
+                        app:backgroundTint="@color/greenLock"
+                        app:useCompatPadding="true"
+                        android:onClick="OnClickQuitt"
+                        />
+
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/quizz_result_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Félicitations !"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/colorAccent" />
+                <TextView
+                    android:id="@+id/quizz_result_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="@android:color/black"
+                    android:text="Infos"
+                    />
+
+            </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
+
+
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/quizz_contact_fab"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="16dp"
+            app:layout_anchorGravity="bottom|center_horizontal"
+            android:clickable="true"
+            android:src="@drawable/ic_email_white_24dp"
+            app:fabSize="normal"
+            app:useCompatPadding="true"
+            android:onClick="OnClickContactMe"
+            />
+
+
+
+
 
 
     </FrameLayout>

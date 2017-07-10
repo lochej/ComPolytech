@@ -1,5 +1,6 @@
 package com.polytech.communicationpolytech;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
@@ -28,7 +31,9 @@ import java.util.List;
 
 public class QuizzActivity extends AppCompatActivity {
 
-
+    private static final String KEY_QUESTION_INDEX="questionIndex";
+    private static final String KEY_QUIZZ_OBJECT="quizzObject";
+    private static final String KEY_ON_RESULT="aff_result";
     //ViewPager quizzPager;
 
     //List<CSVformatter.CSVQuizzEntry> ent;
@@ -57,6 +62,10 @@ public class QuizzActivity extends AppCompatActivity {
 
     TextView quizzResultScore;
 
+    TextView quizzResultHint;
+
+    TextView quizzResultText;
+
     ImageView quizzResultImage;
 
     ImageView quizzLogo;
@@ -64,6 +73,8 @@ public class QuizzActivity extends AppCompatActivity {
     int currentQuestionIndex = 0;
 
     private int[] colors;
+
+    boolean showsResult=false;
 
     public class WaitForAnswerClickListener implements View.OnClickListener {
 
@@ -122,7 +133,15 @@ public class QuizzActivity extends AppCompatActivity {
         setContentView(R.layout.activity_quizz);
 
 
-        setupQuizz();
+        if(savedInstanceState!=null){
+            currentQuestionIndex=savedInstanceState.getInt(KEY_QUESTION_INDEX);
+            quizz =(QuizzManager) savedInstanceState.getSerializable(KEY_QUIZZ_OBJECT);
+            showsResult=savedInstanceState.getBoolean(KEY_ON_RESULT);
+        }else{
+            setupQuizz();
+        }
+
+
 
 
         colors = this.getResources().getIntArray(R.array.header_bg_colors);
@@ -149,6 +168,10 @@ public class QuizzActivity extends AppCompatActivity {
 
         quizzResultScore = (TextView) findViewById(R.id.quizz_score);
 
+        quizzResultHint = (TextView) findViewById(R.id.quizz_result_hint);
+
+        quizzResultText = (TextView) findViewById(R.id.quizz_result_text);
+
         quizzResultImage = (ImageView) findViewById(R.id.quizz_image_trophey);
 
         quizzLogo = (ImageView) findViewById(R.id.quizz_logo);
@@ -169,13 +192,27 @@ public class QuizzActivity extends AppCompatActivity {
             });
             */
         if(quizz!=null){
+
+            if(showsResult){
+                setupResult();
+
+                quizzPlaceholder.setVisibility(View.GONE);
+                quizzContainer.setVisibility(View.GONE);
+                quizzResultContainer.setVisibility(View.VISIBLE);
+                showsResult=true;
+                return;
+            }
             progress.setMax(getQuestionCount());
             quizzPlaceholder.setVisibility(View.GONE);
+            quizzResultContainer.setVisibility(View.GONE);
+            showsResult=false;
+
             setupQuizzQuestionViews(currentQuestionIndex);
         }
         else{
             quizzContainer.setVisibility(View.GONE);
             quizzResultContainer.setVisibility(View.GONE);
+            showsResult=false;
             quizzPlaceholder.setVisibility(View.VISIBLE);
         }
 
@@ -214,6 +251,7 @@ public class QuizzActivity extends AppCompatActivity {
         }
         return 0;
     }
+
     private void setupQuizz() {
         File externalDir = getExternalFilesDir(null);
 
@@ -362,12 +400,45 @@ public class QuizzActivity extends AppCompatActivity {
         quizzResultContainer.startAnimation(fadeIn);
 
         quizzResultContainer.setVisibility(View.VISIBLE);
+        showsResult=true;
 
 
     }
 
     private void setupResult(){
-        quizzResultScore.setText(String.format("%d / %d",quizz.getPointsCount(),getQuestionCount()));
+
+        int points=quizz.getPointsCount();
+
+        int questionCounts=getQuestionCount();
+
+        if(points <= questionCounts*0.30f){
+            quizzResultHint.setText(R.string.fourth_quizz_hint);
+            quizzResultText.setText(R.string.fourth_quizz_result);
+            Glide.with(this).load(R.drawable.bronze_medal).into(quizzResultImage);
+
+        }
+        //Plus de 3 points
+        else if(points <= questionCounts*0.60f){
+            quizzResultHint.setText(R.string.third_quizz_hint);
+            quizzResultText.setText(R.string.third_quizz_result);
+            Glide.with(this).load(R.drawable.bronze_medal).into(quizzResultImage);
+        }
+        //Plus de 6 points
+        else if(points <= questionCounts*0.80f){
+            quizzResultHint.setText(R.string.second_quizz_hint);
+            quizzResultText.setText(R.string.second_quizz_result);
+            Glide.with(this).load(R.drawable.silver_medal).into(quizzResultImage);
+        }
+        //Plus de 8 points
+        else{
+            quizzResultHint.setText(R.string.first_quizz_hint);
+            quizzResultText.setText(R.string.first_quizz_result);
+            Glide.with(this).load(R.drawable.gold_medal).into(quizzResultImage);
+        }
+
+        quizzResultScore.setText(String.format("%d / %d",points,questionCounts));
+
+
     }
 
     private void setAnswersColor(CSVformatter.CSVQuizzEntry entry) {
@@ -390,6 +461,19 @@ public class QuizzActivity extends AppCompatActivity {
 
     }
 
+    public void OnClickContactMe(View view){
+
+        Intent startContactActivity=new Intent(view.getContext(),ContactActivity.class);
+
+        view.getContext().startActivity(startContactActivity);
+
+        finish();
+
+    }
+
+    public void OnClickQuitt(View view){
+        finish();
+    }
 
     public class QuizzManager implements Serializable {
 
@@ -513,8 +597,16 @@ public class QuizzActivity extends AppCompatActivity {
         return entries;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-//
+        outState.putInt(KEY_QUESTION_INDEX,currentQuestionIndex);
+        outState.putSerializable(KEY_QUIZZ_OBJECT,quizz);
+        outState.putBoolean(KEY_ON_RESULT,showsResult);
+    }
+
+    //
 //    /**
 //     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
 //     * one of the sections/tabs/pages.

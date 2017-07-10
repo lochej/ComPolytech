@@ -25,15 +25,24 @@
     <string name="star">(*)</string>
     <string name="contact_hint_intro">Remplissez ce formulaire de contact si vous souhaitez être recontacté. Ces informations seront utilisés par Polytech Tours pour vous recontacter. Les champs (*) sont obligatoires.</string>
     <string name="incorrect_email_adress">Addresse E-mail incorrecte.</string>
-    <string name="loading">Chargement en cours...</string>
+    <string name="loading">Chargement en cours…</string>
     <string name="video">Vidéo</string>
     <string name="image">Image</string>
     <string name="title_activity_candidat">CandidatActivity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_polytech2">Polytech2Activity</string>
-    <string name="check_for_updates_drive">Vérification des mises à jours de fichiers...</string>
+    <string name="check_for_updates_drive">Vérification des mises à jours de fichiers…</string>
     <string name="downloading_Files">Téléchargement des fichiers</string>
     <string name="not_checked_for_updates_yet">Les mises à jours de fichiers n\'ont pas encore été vérifiés.</string>
+    <string name="first_quizz_result">Félicitations !</string>
+    <string name="second_quizz_result">Bravo !</string>
+    <string name="third_quizz_result">Pas mal.</string>
+    <string name="fourth_quizz_result">Tu peux mieux faire.</string>
+    <string name="first_quizz_hint">Tu connais très bien Polytech et son réseau !\nN\'hésite pas à fournir tes coordonnées en cliquant sur l\'enveloppe pour en apprendre d\'avantage !\nNous serons ravis de te recontacter et répondre à tes questions !</string>
+    <string name="second_quizz_hint">Tu connais bien Polytech et son réseau !\nN\'hésite pas à fournir tes coordonnées en cliquant sur l\'enveloppe pour en apprendre d\'avantage !\nNous serons ravis de te recontacter et répondre à tes questions !</string>
+    <string name="third_quizz_hint">Tu connais Polytech et son réseau mais tu as besoin de plus d\'informations !\nN\'hésite pas à fournir tes coordonnées en cliquant sur l\'enveloppe pour en apprendre d\'avantage !\nNous serons ravis de te recontacter et répondre à tes questions !</string>
+    <string name="fourth_quizz_hint">Tu ne connais pas très bien Polytech et son réseau, tu as besoin de renseignements !\nN\'hésite pas à fournir tes coordonnées en cliquant sur l\'enveloppe pour en apprendre d\'avantage !\nNous serons ravis de te recontacter et répondre à tes questions !</string>
+
 
 </resources>
