@@ -54,6 +54,7 @@ import com.google.api.services.drive.model.FileList;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -295,6 +296,15 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
 
     //######################## METHODS DIVERS ###########################
 
+    private void displayInfoDialog(String message){
+        AlertDialog.Builder b=new AlertDialog.Builder(this);
+
+        b.setTitle("Information");
+        b.setMessage(message);
+        b.setPositiveButton("OK",null);
+
+        b.create().show();
+    }
 
     private void showSnackBar(String message,int length){
         Snackbar.make(mMainCoordinatorLayout,message,length).show();
@@ -386,6 +396,21 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
     private void downloadDriveFileToStorage(com.google.api.services.drive.Drive driveService,String ID) throws IOException {
 
 
+        java.io.File StorageFile=prepareFileToDownload(driveService,ID);
+
+        //Telechargement du fichier
+
+        OutputStream outputStream = new FileOutputStream(StorageFile);
+        Drive.Files.Get request=driveService.files().get(ID);
+        //request.getMediaHttpDownloader().setProgressListener(new DownloadProgressListener());
+        request.executeMediaAndDownloadTo(outputStream);
+
+        outputStream.close();
+
+
+    }
+
+    private java.io.File prepareFileToDownload(com.google.api.services.drive.Drive driveService, String ID){
         java.io.File StorageFile=Storage_Treemap.get(ID);
 
         java.io.File StorageFolder = StorageFile.getParentFile();
@@ -400,16 +425,7 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
             }
         }
 
-        //Telechargement du fichier
-
-        OutputStream outputStream = new FileOutputStream(StorageFile);
-        Drive.Files.Get request=driveService.files().get(ID);
-        //request.getMediaHttpDownloader().setProgressListener(new DownloadProgressListener());
-        request.executeMediaAndDownloadTo(outputStream);
-
-        outputStream.close();
-
-
+        return StorageFile;
     }
 
     /**
@@ -862,6 +878,8 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
         private Exception mLastError;
         private java.io.File currentFile;
 
+        private OutputStream currentFileDLOutputStream;
+
 
         public DLfileTask(GoogleAccountCredential credential) {
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
@@ -892,6 +910,10 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
 
             for(int i=0;i<files.length;i++){
 
+                if(isCancelled()){
+                    break;
+                }
+
                 String id=files[i];
 
                 Bundle progressValues=new Bundle(2);
@@ -904,7 +926,20 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
 
                 try {
 
-                    downloadDriveFileToStorage(mService,id);
+                    //downloadDriveFileToStorage(mService,id);
+
+                    java.io.File StorageFile=prepareFileToDownload(mService,id);
+
+                    //Telechargement du fichier
+
+                    currentFileDLOutputStream = new FileOutputStream(StorageFile);
+                    Drive.Files.Get request=mService.files().get(id);
+                    //request.getMediaHttpDownloader().setProgressListener(new DownloadProgressListener());
+                    request.executeMediaAndDownloadTo(currentFileDLOutputStream);
+
+                    currentFileDLOutputStream.close();
+
+
                     Log.d("DOWNLOADED","Succesfully downloaded:"+Drive_Treemap.get(id).getName() +" | "+ id);
                 } catch (IOException e) {
 
@@ -912,8 +947,8 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
                     currentFile.delete();
                     e.printStackTrace();
                     mLastError=e;
-                    Log.e("DOWNLOAD Task",e.getMessage());
                     cancel(true);
+
                     return null;
                 }
 
@@ -982,19 +1017,26 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
         protected void onPreExecute() {
             super.onPreExecute();
             mDlProgress.setProgress(0);
-            mDlProgress.show();
             mDlProgress.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialog) {
+
                     cancel(true);
+
+
+
                 }
             });
+
+            mDlProgress.show();
+
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             mDlProgress.hide();
+            displayInfoDialog("Téléchargement terminé");
             showSnackBar("Téléchargement terminé",Snackbar.LENGTH_LONG);
             //Toast.makeText(ReservedSpaceActivity.this,"FILE DOWNLOADED OK",Toast.LENGTH_SHORT).show();
         }
@@ -1021,7 +1063,14 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
             }
 
             if(mLastError != null){
+
+                if(mLastError instanceof InterruptedIOException){
+                    showColoredSnackBar(R.color.redLock,"Téléchargement arrété.",Snackbar.LENGTH_INDEFINITE);
+                    return;
+                }
+
                 showColoredSnackBar(R.color.redLock,"Arrêt du téléchargement: "+ mLastError.getLocalizedMessage(),Snackbar.LENGTH_INDEFINITE);
+                displayInfoDialog("Téléchargement arrêté: "+ mLastError.getLocalizedMessage());
                 return;
             }
             showColoredSnackBar(R.color.redLock,"Tous les fichiers n'ont pas été téléchargés",Snackbar.LENGTH_INDEFINITE);
@@ -1091,6 +1140,7 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
                 return getDataFromApi();
             } catch (Exception e) {
                 mLastError = e;
+                e.printStackTrace();
                 cancel(true);
                 return null;
             }
@@ -1240,7 +1290,13 @@ public class GoogleSyncActivity extends AppCompatActivity implements EasyPermiss
                     startActivityForResult(
                             ((UserRecoverableAuthIOException) mLastError).getIntent(),
                             GoogleSyncActivity.REQUEST_AUTHORIZATION);
-                } else {
+                }
+                else if(mLastError instanceof InterruptedIOException){
+                    mOutputText.setText("La vérification a été interrompue." +
+                            "\n" +
+                            "Veuillez réessayer.");
+                }
+                else {
                     mOutputText.setText("Veuillez réessayer la vérification." +
                             "\n" +
                             "Une erreur s'est produite:\n"
