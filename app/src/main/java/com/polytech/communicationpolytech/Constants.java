@@ -10,7 +10,7 @@ import java.util.Comparator;
 interface Constants {
 
 
-
+    //"Polytech2017!".hashcode()
     int passHash=1253867675;
 
     int TYPE_PDF=0;

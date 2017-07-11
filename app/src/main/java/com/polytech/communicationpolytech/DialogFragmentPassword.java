@@ -64,7 +64,7 @@ public class DialogFragmentPassword extends DialogFragment {
                         int enteredPassHash=passedittext.getText().toString().hashCode();
 
                         //le mdp est correcte, on lance l'activite espace reserve
-                        if(enteredPassHash==passHash || true){
+                        if(enteredPassHash==passHash){
 
                             Toast.makeText(v.getContext(),R.string.reserved_space,Toast.LENGTH_SHORT).show();
 
