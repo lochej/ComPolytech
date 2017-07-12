@@ -57,4 +57,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-auth:10.2.4'
     compile 'pub.devrel:easypermissions:0.2.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.github.jimcoven:jcropimageview:0.22'
 }

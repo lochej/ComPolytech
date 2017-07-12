@@ -1,7 +1,10 @@
 package com.polytech.communicationpolytech;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Locale;
 
 /**
  * Created by Jérémy on 12/04/2017.
@@ -42,6 +45,8 @@ interface Constants {
 
     String CSV_FORMULAIRE ="formulaire.csv";
     String CSV_QUIZZ ="quizz.csv";
+
+    DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE);
 
     Comparator<File> alphaComp=new Comparator<File>() {
         @Override

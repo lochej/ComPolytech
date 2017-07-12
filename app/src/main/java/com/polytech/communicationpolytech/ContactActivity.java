@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.TreeMap;
 
 public class ContactActivity extends AppCompatActivity {
@@ -135,7 +137,7 @@ public class ContactActivity extends AppCompatActivity {
             snack.show();
 
 
-            CSVformatter.CSVFormEntry entry=new CSVformatter.CSVFormEntry(nom,prenom,newsletter,study,mail);
+            CSVformatter.CSVFormEntry entry=new CSVformatter.CSVFormEntry(nom,prenom,newsletter,study,mail,Constants.dateFormat.format(new Date()));
 
 
             try {

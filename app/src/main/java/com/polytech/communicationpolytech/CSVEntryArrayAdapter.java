@@ -16,9 +16,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.TreeMap;
 
 
@@ -42,6 +44,7 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
     final static int SORT_MAIL=2;
     final static int SORT_STUDY=3;
     final static int SORT_NEWS=4;
+    final static int SORT_DATE=5;
 
     int CURRENT_SORTING=SORT_NOM;
 
@@ -126,6 +129,30 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
         }
     };
 
+    Comparator<CSVformatter.CSVFormEntry> sortByDate=new Comparator<CSVformatter.CSVFormEntry>() {
+        @Override
+        public int compare(CSVformatter.CSVFormEntry o1, CSVformatter.CSVFormEntry o2) {
+
+
+            Date date1=null;
+            Date date2=null;
+            try {
+                date1=Constants.dateFormat.parse(o1.getDateString());
+                date2=Constants.dateFormat.parse(o2.getDateString());
+            } catch (ParseException e) {
+                e.printStackTrace();
+
+            }
+
+            if(date1==null || date2==null){
+                return 0;
+            }
+
+            return date1.compareTo(date2);
+        }
+    };
+
+
     @Nullable
     @Override
     public CSVformatter.CSVFormEntry getItem(int position) {
@@ -195,12 +222,14 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
         TextView email=(TextView) view.findViewById(R.id.csv_email);
         TextView news=(TextView) view.findViewById(R.id.csv_news);
         TextView study=(TextView) view.findViewById(R.id.csv_study);
+        TextView date=(TextView) view.findViewById(R.id.csv_date);
         ImageButton delete=(ImageButton) view.findViewById(R.id.csv_delete);
 
         String prenom=entry.getPrenom().trim();
         String nom=entry.getNom().trim();
         String newsStr =entry.getNews().trim();
         String studyStr= entry.getStudy().trim();
+        String dateStr=entry.getDateString().trim();
 
 
         if(prenom.length()==0 && nom.length()==0){
@@ -230,6 +259,15 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
         else{
             study.setTextColor(ContextCompat.getColor(view.getContext(),R.color.gray));
             study.setText(studyStr);
+        }
+
+        if(dateStr.length()==0){
+            date.setTextColor(ContextCompat.getColor(view.getContext(),R.color.lite_lite_gray));
+            date.setText("Inconnue");
+        }
+        else{
+            date.setTextColor(ContextCompat.getColor(view.getContext(),R.color.gray));
+            date.setText(dateStr);
         }
 
         study.setText(entry.getStudy());
@@ -285,6 +323,8 @@ public class CSVEntryArrayAdapter extends ArrayAdapter<CSVformatter.CSVFormEntry
             case SORT_STUDY:
                 Collections.sort(values,sortByStudy);
                 break;
+            case SORT_DATE:
+                Collections.sort(values,sortByDate);
             default:
 
         }

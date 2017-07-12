@@ -20,9 +20,53 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
+
+        <LinearLayout
+            android:id="@+id/card_title_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/cardTitleBackground"
+            android:weightSum="1">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:textColor="@android:color/black"
+                android:text="@string/card_view_title"
+                android:ellipsize="end"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/card_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_margin="10dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_video_library_black_24dp"
+                />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/card_divider"
+            android:layout_below="@id/card_title_container"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@android:color/darker_gray"
+            />
+
         <FrameLayout
             android:id="@+id/card_video_container"
-            android:layout_alignParentTop="true"
+            android:layout_below="@id/card_divider"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/black">
@@ -102,47 +146,7 @@
 
 
 
-        <View
-            android:id="@+id/card_divider"
-            android:layout_below="@id/card_video_container"
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@android:color/darker_gray"
-        />
 
-        <LinearLayout
-            android:layout_below="@id/card_divider"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/cardTitleBackground"
-            android:weightSum="1">
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:textSize="15sp"
-                android:maxLines="1"
-                android:textColor="@android:color/black"
-                android:text="@string/card_view_title"
-                android:ellipsize="end"
-                android:layout_weight="1" />
-
-            <ImageView
-                android:id="@+id/card_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="10dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_video_library_black_24dp"
-                />
-
-        </LinearLayout>
 
 
 

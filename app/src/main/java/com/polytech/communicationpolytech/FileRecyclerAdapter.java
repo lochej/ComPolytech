@@ -109,7 +109,8 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         private TextView title;
         private TextView placeholder;
-        private ImageView imgThumb,imgIcon;
+        private ImageView imgThumb;
+        private ImageView imgIcon;
         private FileItem currentItem;
         private View itemView;
         private LoadPDFThumbTask pdfThumbTask;
@@ -280,7 +281,8 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         private TextView title;
         //private TextView placeholder;
-        private ImageView imgThumb,imgIcon;
+        private ImageView imgThumb;
+        private ImageView imgIcon;
         private FileItem currentItem;
         private View itemView;
         Context context;
@@ -324,7 +326,8 @@ public class FileRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         private TextView title;
         //private TextView placeholder;
-        private ImageView imgThumb,imgIcon;
+        private ImageView imgThumb;
+        private ImageView imgIcon;
         private FileItem currentItem;
         private View itemView;
         private FloatingActionButton playFab;
