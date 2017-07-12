@@ -8,9 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Serializable;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -27,7 +29,7 @@ public class CSVformatter {
 
     public static final String[] headerGoogle = {"Name", "Given Name", "Additional Name", "Family Name", "Yomi Name", "Given Name Yomi", "Additional Name Yomi", "Family Name Yomi", "Name Prefix", "Name Suffix", "Initials", "Nickname", "Short Name", "Maiden Name", "Birthday", "Gender", "Location", "Billing Information", "Directory Server", "Mileage", "Occupation", "Hobby", "Sensitivity", "Priority", "Subject", "Notes", "Group Membership", "E-mail 1 - Type", "E-mail 1 - Value", "Phone 1 - Type", "Phone 1 - Value", "Phone 2 - Type", "Phone 2 - Value", "Organization 1 - Type", "Organization 1 - Name", "Organization 1 - Yomi Name", "Organization 1 - Title", "Organization 1 - Department", "Organization 1 - Symbol", "Organization 1 - Location", "Organization 1 - Job Description", "Website 1 - Type", "Website 1 - Value"};
 
-    public static final String[] headerCustom = {"Nom","Prénom","Adresse E-mail","Études en cours","Recontacter à propos de"};
+    public static final String[] headerCustom = {"Nom","Prénom","Adresse E-mail","Études en cours","Recontacter à propos de","Date"};
 
     public static final String[] headerQuizz= {"Question","Explication","Reponse 1 vraie","Reponse 2 fausse", "Reponse 3 fausse","Reponse 4 fausse","Reponse 5 fausse"};
 
@@ -38,7 +40,7 @@ public class CSVformatter {
     public static final int[] headerOutlookIndex={0,2,14};
 
     //Nom, Prenom, Email, Etudes en cours, Recontacter à propos
-    public static final int[] headerCustomIndex={0,1,2,3,4};
+    public static final int[] headerCustomIndex={0,1,2,3,4,5};
 
     //Question,Explication,Reponse 1 vraie,Reponse 2 fausse,Reponse 3 fausse, Reponse 4 fausse, Reponse 5 fausse
     public static final int[] headerQuizzIndex={0,1,2,3,4,5,6};
@@ -171,7 +173,7 @@ public class CSVformatter {
                     formatType=FORMAT_GOOGLE;
                 }
                 else if(Arrays.equals(headers,headerOutlook)){
-                    formatType=FORMAT_CUSTOM;
+                    formatType=FORMAT_OUTLOOK;
                 }
                 else if(Arrays.equals(headers,headerCustom)){
                     formatType=FORMAT_CUSTOM;
@@ -365,13 +367,14 @@ public class CSVformatter {
     }
 
 
-    public static class CSVFormEntry {
+    public static class CSVFormEntry implements Serializable{
 
         private String nom="";
         private String prenom="";
         private String news="";
         private String study="";
         private String mail="";
+        private String date="";
 
         public String getMail() {
             return mail;
@@ -385,12 +388,25 @@ public class CSVformatter {
             this.mail = mail;
         }
 
-        public CSVFormEntry(String nom, String prenom, String news, String study, String mail) {
+        public CSVFormEntry(String nom, String prenom, String news, String study, String mail,String date) {
             this.nom = nom;
             this.prenom = prenom;
             this.news = news;
             this.study = study;
             this.mail = mail;
+            this.date=date;
+        }
+
+        public  Date getDate() throws ParseException {
+            return Constants.dateFormat.parse(date);
+        }
+
+        public String getDateString(){
+            return date;
+        }
+
+        public void setDateString(String date){
+            this.date=date;
         }
 
         public String getNom() {
@@ -454,14 +470,14 @@ public class CSVformatter {
             entry.setPrenom(fields[headerindexes[1]]);
             entry.setStudy(fields[headerindexes[3]]);
             entry.setNews(fields[headerindexes[4]]);
-
+            entry.setDateString(fields[headerindexes[5]]);
             return entry;
 
         }
 
         @Override
         public String toString() {
-            return nom + "|" + prenom + "|" + mail + "|" + study + "|" + news;
+            return nom + "|" + prenom + "|" + mail + "|" + study + "|" + news+ "|" +date;
         }
 
         @Override
@@ -470,7 +486,7 @@ public class CSVformatter {
         }
 
         public String[] toArray(){
-            return new String[]{nom,prenom,mail,study,news};
+            return new String[]{nom,prenom,mail,study,news,date};
         }
     }
 
